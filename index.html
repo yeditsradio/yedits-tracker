@@ -714,6 +714,12 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
   border-radius:4px;margin-top:12px;font-size:14px;color:#dbdee1;cursor:pointer}
 .sy-auto input{width:18px;height:18px;accent-color:#5865f2;cursor:pointer}
 
+
+#mg-sheetbar{display:flex;align-items:center;gap:10px;padding:7px 20px;background:rgba(35,165,90,.1);
+  border-bottom:1px solid rgba(35,165,90,.2);color:#4ad182;font-size:12.5px;font-weight:600;flex-shrink:0}
+#mg-sheetbar .dot{width:7px;height:7px;border-radius:50%;background:#23a55a;flex-shrink:0}
+#mg-sheetbar .mgeb{margin-left:auto}
+
 /* ══════ EDIT MODE ══════ */
 #emode-bar{display:none;padding:8px 16px;background:var(--green);align-items:center;gap:10px;
   flex-shrink:0;font-size:13px;font-weight:600;color:#fff}
@@ -817,7 +823,6 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
     <div class="rl on" id="r-edits"><span>YE</span><span class="tip">Edits Tracker</span></div>
     <div class="rl" id="r-comps"><span style="font-size:19px;font-weight:800;font-family:'Archivo',sans-serif">M</span><span class="tip">Comps</span></div>
     <div class="rl" id="r-board"><span style="font-size:16px;font-family:'Archivo'">&#9650;</span><span class="tip">Leaderboard</span></div>
-    <div class="rl" id="r-edit"><span style="font-size:15px;font-family:'Archivo'">&#9998;</span><span class="tip">Edit mode</span></div>
     <div class="rl" id="r-sync"><span style="font-size:17px;font-family:'Archivo',sans-serif">&#8635;</span><span class="tip">Sync from Google Sheets</span></div>
     <div class="rl-sep"></div>
     <div class="rl" id="r-guide"><span style="font-size:17px;font-family:'Archivo'">?</span><span class="tip">Guide</span></div>
@@ -971,8 +976,8 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
    File > Share > Publish to web > pick the tab > CSV > Publish > copy
    Leave blank to use the data baked into this file instead.
    ═══════════════════════════════════════════════════════════════════ */
-var SHEET_EDITS = '';
-var SHEET_COMPS = '';
+var SHEET_EDITS = 'https://docs.google.com/spreadsheets/d/1J83vvogabRvZtP48De4uTHqXQeNQKQqfKdMkfCN_Ivk/gviz/tq?tqx=out:csv&headers=1&gid=1171110052';
+var SHEET_COMPS = 'https://docs.google.com/spreadsheets/d/1J83vvogabRvZtP48De4uTHqXQeNQKQqfKdMkfCN_Ivk/gviz/tq?tqx=out:csv&headers=1&gid=1693937245';
 /* Set to false if you'd rather press the sync button manually */
 var SHEET_AUTOSYNC = true;
 /* ═══════════════════════════════════════════════════════════════════ */
@@ -1416,7 +1421,7 @@ function setView(v){
   el('lb').classList.toggle('on', v==='board');
   el('mg').classList.toggle('on', v==='comps');
   el('r-comps').classList.toggle('on', v==='comps');
-  el('emode-bar').classList.toggle('on', EMODE && v==='tracker');
+
   el('sbar').style.display = (v==='comps') ? 'none' : '';
   el('top').style.display  = (v==='comps') ? 'none' : '';
   el('sq').placeholder = v==='board' ? 'Search editors\u2026' : 'Search songs, edits, editors\u2026';
@@ -1430,7 +1435,7 @@ el('r-edits').onclick = function(){ setView('tracker'); };
 
 
 /* ═════════════ EDIT MODE ═════════════ */
-var EMODE = false;
+var EMODE = false;   /* read-only build — sheet is the source of truth */
 var STORE_KEY = 'yedits_overrides_v1';
 
 /* ---------- persistence: store a patch of changed songs ---------- */
@@ -1490,16 +1495,8 @@ function toast(msg, isErr){
 }
 
 /* ---------- toggle ---------- */
-function setEmode(on){
-  EMODE = on;
-  el('r-edit').classList.toggle('edit-on', on);
-  el('emode-bar').classList.toggle('on', on && view === 'tracker');
-  draw();
-}
-el('r-edit').onclick = function(){
-  if(view !== 'tracker') setView('tracker');
-  setEmode(!EMODE);
-};
+function setEmode(on){ EMODE = false; }
+/* edit mode removed — data comes from the Google Sheet */
 
 /* ---------- form modal ---------- */
 var FORM = null;   /* {mode, song, era, tab, idx} */
@@ -1769,14 +1766,10 @@ function drawMega(){
       '<span id="mg-grid-ico">&#9638;&#9638;</span>'+
       '<div id="mg-avatar">Y</div>'+
     '</div>'+
-    '<div id="mg-emode'+(MGEDIT?' on':'')+'" class="'+(MGEDIT?'on':'')+'">'+
-      '<span>&#9998; Edit mode &mdash; changes save to this browser</span>'+
-      '<span class="sp">'+
-        '<button class="mgeb" id="mg-newera">+ New era</button>'+
-        '<button class="mgeb pri" id="mg-export">Export comps</button>'+
-        '<button class="mgeb" id="mg-reset">Reset</button>'+
-      '</span>'+
-    '</div>'+
+
+    '<div id="mg-sheetbar"><span class="dot"></span>'+
+      '<span>Live from Google Sheets</span>'+
+      '<button class="mgeb" id="mg-refresh">Refresh</button></div>'+
     '<div id="mg-actions">'+
       '<button class="mg-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
         '<path d="M8 11V3M8 3L5 6M8 3l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'+
@@ -1784,8 +1777,7 @@ function drawMega(){
       '<button class="mg-btn solid"><svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
         '<path d="M8 3v8M8 11L5 8M8 11l3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'+
         '<path d="M2.5 11.5v.5A2 2 0 004.5 14h7a2 2 0 002-2v-.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Download</button>'+
-      '<button class="mg-btn" id="mg-toggle-edit" style="margin-left:auto">'+
-        (MGEDIT?'&#10005; Exit edit mode':'&#9998; Edit')+'</button>'+
+
     '</div>'+
     '<div id="mg-crumb">'+crumb+'</div>'+
     (tabs ? '<div id="mg-tabs">'+tabs+'</div>' : '')+
@@ -1896,7 +1888,7 @@ function mgFullList(){
   return mgTab==='r' ? era.r : era.p;
 }
 
-var MGEDIT = false;
+var MGEDIT = false;  /* read-only build */
 var MG_KEY = 'yedits_comps_v1';
 
 function mgLoad(){ try{ return JSON.parse(localStorage.getItem(MG_KEY)||'{}'); }catch(e){ return {}; } }
@@ -1936,11 +1928,10 @@ function bindMega(){
     qi.oninput = function(){ mgQ = this.value; drawMgRows(); };
   }
 
-  var te = el('mg-toggle-edit');
-  if(te) te.onclick = function(){ MGEDIT = !MGEDIT; mgSel=null; drawMega(); };
+  /* edit toggle removed — comps come from the Google Sheet */
 
-  var ne = el('mg-newera');
-  if(ne) ne.onclick = mgNewEra;
+  var rf = el('mg-refresh');
+  if(rf) rf.onclick = function(){ runSync(false); toast('Refreshing from sheet\u2026'); };
   var ex = el('mg-export');
   if(ex) ex.onclick = function(){
     var blob = new Blob([JSON.stringify({eras:CERAS, rs:CD.rs, ps:CD.ps})], {type:'application/json'});
@@ -2198,7 +2189,10 @@ function syncStatus(msg, cls){
 
 function applyEditsCSV(objs){
   var byEra = {};
-  ERAS.forEach(function(e){ byEra[e.name.toLowerCase()] = e; });
+  ERAS.forEach(function(e){
+    e.songs.forEach(function(s){ s.d = []; s.p = []; });
+    byEra[e.name.toLowerCase()] = e;
+  });
   var made = 0, miss = [];
   var touched = {};
 
@@ -2212,8 +2206,6 @@ function applyEditsCSV(objs){
       song = {n: songName, s: o.section || 'Album Tracks', d: [], p: []};
       era.songs.push(song);
     }
-    var key = era.name + '\u241F' + song.n;
-    if(!touched[key]){ song.d = []; song.p = []; touched[key] = song; }
 
     var isSpec = /^s/i.test(o.tab || '');
     var obj = {
@@ -2230,18 +2222,13 @@ function applyEditsCSV(objs){
     made++;
   });
 
-  var patch = loadPatch();
-  Object.keys(touched).forEach(function(k){
-    patch[k] = {d: touched[k].d, p: touched[k].p};
-  });
-  savePatch(patch);
   BOARD = null;
   return {n: made, miss: miss};
 }
 
 function applyCompsCSV(objs){
   var byEra = {};
-  CERAS.forEach(function(e){ byEra[e.name.toLowerCase()] = e; });
+  CERAS.forEach(function(e){ e.r = []; e.p = []; byEra[e.name.toLowerCase()] = e; });
   var made = 0, touched = {};
 
   objs.forEach(function(o){
@@ -2251,7 +2238,6 @@ function applyCompsCSV(objs){
       era = {name: eraName, color: '#8a8a95', r: [], p: []};
       CERAS.push(era); byEra[eraName.toLowerCase()] = era;
     }
-    if(!touched[era.name]){ era.r = []; era.p = []; touched[era.name] = era; }
     var isSpec = /^s/i.test(o.tab || '');
     var obj = {
       name: o.name || '', creator: o.creator || 'unknown',
@@ -2266,11 +2252,6 @@ function applyCompsCSV(objs){
     made++;
   });
 
-  var p = mgLoad();
-  Object.keys(touched).forEach(function(k){
-    p[k] = {r: touched[k].r, p: touched[k].p};
-  });
-  mgSave(p);
   return {n: made};
 }
 
@@ -2302,10 +2283,13 @@ function runSync(silent){
   Promise.all(jobs).then(function(){
     cfg.last = new Date().toISOString();
     syncSave(cfg);
+    BOARD = null;
     if(!silent) syncStatus('Synced '+report.join(' and ')+'.', 'ok');
     toast('Synced from Google Sheets');
-    drawEras(); draw();
-    if(view === 'comps') drawMega();
+    drawEras();
+    if(view === 'board') drawBoard();
+    else if(view === 'comps') drawMega();
+    else draw();
   }).catch(function(err){
     var msg = 'Sync failed: '+esc(err.message)+
       '<br><span style="opacity:.85">Check the link is a <b>published</b> CSV and that the sheet is shared. '+
@@ -2319,7 +2303,7 @@ el('r-sync').onclick = function(){
   var cfg = syncCfg();
   el('sy-url-e').value = cfg.edits || '';
   el('sy-url-c').value = cfg.comps || '';
-  var locked = !!(SHEET_EDITS || SHEET_COMPS);
+  var locked = true;
   el('sy-url-e').disabled = el('sy-url-c').disabled = locked;
   el('sy-url-e').style.opacity = el('sy-url-c').style.opacity = locked ? '.6' : '';
   el('sy-lock').style.display = locked ? 'block' : 'none';
