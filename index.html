@@ -15,6 +15,7 @@
   --tx:#f2f3f5;--tx2:#dbdee1;--tx3:#b5bac1;--mut:#949ba4;--fnt:#80848e;--dim:#4e5058;
   --bl:#5865f2;--bl2:#4752c4;--grn:#23a55a;--red:#f23f43;--yel:#f0b132;
   --ov:#f23f43;--rn:#f0883e;--vn:#23a55a;--ex:#00a8fc;--rx:#c07ef5;
+  --gold:#ffcc00;--amber:#f0b132;--purp:#c07ef5;--rust:#8a5a2b;
   --sh:44px;
 }
 html,body{height:100%;overflow:hidden;background:var(--chat);color:var(--tx2);
@@ -28,7 +29,7 @@ html,body{height:100%;overflow:hidden;background:var(--chat);color:var(--tx2);
   align-items:center;padding:12px 0;gap:8px;z-index:60;overflow:visible}
 .rl{width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;
   cursor:pointer;position:relative;background:var(--side);color:var(--tx2);font-size:17px;font-weight:600;
-  flex-shrink:0;transition:border-radius .15s,background-color .15s,color .15s}
+  flex-shrink:0;text-decoration:none;transition:border-radius .15s,background-color .15s,color .15s}
 .rl:hover,.rl.on{border-radius:16px;background:var(--bl);color:#fff}
 #r-comps.on{background:#d9272e}
 #r-board.on{background:#f6931e;color:#1a1a1a}
@@ -110,12 +111,14 @@ html,body{height:100%;overflow:hidden;background:var(--chat);color:var(--tx2);
 .pill.on[data-t="Vanilla-Style"]{background:var(--vn)}
 .pill.on[data-t="Extension"]{background:var(--ex)}
 .pill.on[data-t="Remix"]{background:var(--rx);color:#1a1a1a}
-.pill.on[data-f="hl"]{background:var(--yel);color:#1a1a1a}
-.pill.on[data-f="incomp"],.pill.on[data-f="single"]{background:var(--bl)}
+.pill.on[data-f="hl"]{background:var(--gold);color:#1a1400}
+.pill.on[data-f="incomp"]{background:var(--bl)}
+.pill.on[data-f="nocomp"]{background:var(--dim);color:var(--tx)}
+.pill.on[data-f="single"]{background:var(--purp);color:#1a0f2a}
 .pill.on[data-f="released"]{background:var(--grn)}
-.pill.on[data-f="wip"]{background:var(--yel);color:#1a1a1a}
+.pill.on[data-f="wip"]{background:var(--amber);color:#1a1400}
 .pill.on[data-f="cancelled"]{background:var(--red)}
-.pill.on[data-f="outdated"]{background:#8a6d3b}
+.pill.on[data-f="outdated"]{background:var(--rust);color:#fff}
 .pill.on[data-f]{background:var(--bl)}
 .pill.clear{background:transparent;border:1px solid var(--line);color:var(--fnt)}
 .pill.clear:hover{background:var(--input);color:var(--tx2)}
@@ -269,6 +272,30 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
 .mgtab-n{font-size:11px;font-weight:700;background:#3a3a3a;padding:1px 7px;border-radius:10px;
   color:var(--mgt2);font-family:'JetBrains Mono',monospace}
 .mgtab.on .mgtab-n{background:var(--mgr);color:#fff}
+
+/* comps filter pills — native MEGA look (dark rounded pill),
+   but reusing the exact same semantic colours as the Edits page pills */
+#mg-filters{padding:8px 20px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.mg-flbl{font-size:10.5px;font-weight:700;color:var(--mgt3);text-transform:uppercase;
+  letter-spacing:.04em;margin-right:2px;flex-shrink:0}
+.mg-fdiv{width:1px;height:15px;background:var(--mgl);margin:0 4px;flex-shrink:0}
+.mgpill{font-size:12px;font-weight:600;padding:5px 12px;border-radius:14px;
+  background:#1e1e1e;border:1px solid #2e2e2e;color:var(--mgt2);cursor:pointer;
+  transition:background-color .12s,color .12s,border-color .12s;user-select:none;white-space:nowrap}
+.mgpill:hover{background:#262626;border-color:#3a3a3a;color:#f2f2f2}
+.mgpill.on{color:#fff;border-color:transparent}
+.mgpill.on[data-t="Overhaul"]{background:var(--ov)}
+.mgpill.on[data-t="Renovation"]{background:var(--rn);color:#1a1a1a}
+.mgpill.on[data-t="Vanilla-Style"]{background:var(--vn)}
+.mgpill.on[data-t="Extension"]{background:var(--ex)}
+.mgpill.on[data-t="Remix"]{background:var(--rx);color:#1a1a1a}
+.mgpill.on[data-f="hl"]{background:var(--gold);color:#1a1400}
+.mgpill.on[data-f="released"]{background:var(--grn)}
+.mgpill.on[data-f="wip"]{background:var(--amber);color:#1a1400}
+.mgpill.on[data-f="cancelled"]{background:var(--red)}
+.mgpill.on[data-f="outdated"]{background:var(--rust);color:#fff}
+.mgpill.clear{background:transparent;border:1px solid var(--mgl);color:var(--mgt3)}
+.mgpill.clear:hover{background:#1e1e1e;color:var(--mgt2)}
 #mg-view{margin-left:auto;display:flex;gap:4px}
 .mgv{width:32px;height:30px;border-radius:6px;border:none;background:transparent;color:var(--mgt3);
   cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
@@ -564,6 +591,10 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
     <div class="rl" id="r-board"><span>&#9650;</span><span class="tip">Leaderboard</span></div>
     <div class="rl-sep"></div>
     <div class="rl" id="r-guide"><span>?</span><span class="tip">Guide</span></div>
+    <a class="rl" id="r-tiktok" href="https://www.tiktok.com/@yeditsradio" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.6h-3.16v13.9c0 1.62-1.32 2.95-2.95 2.95a2.95 2.95 0 01-2.95-2.95 2.95 2.95 0 012.95-2.95c.28 0 .55.04.8.11V9.98a6.16 6.16 0 00-.8-.05A6.16 6.16 0 003.1 16.1a6.16 6.16 0 006.16 6.15 6.16 6.16 0 006.16-6.15V9.01a9.4 9.4 0 005.48 1.76V7.6a5.83 5.83 0 01-4.3-1.78z"/></svg>
+      <span class="tip">@yeditsradio on TikTok</span>
+    </a>
   </div>
 
   <div id="side">
@@ -643,6 +674,21 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
       </div></div>
     <div class="ms"><div class="ms-t">Note</div>
       <div class="mbox">Type colour is descriptive, not a ranking. All data comes from the linked Google Sheet &mdash; edit the sheet and the site follows.</div></div>
+    <div class="ms"><div class="ms-t">Credits</div>
+      <div class="mbox" style="display:flex;align-items:center;gap:14px">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--bl);flex-shrink:0;
+          display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:15px">FG</div>
+        <div style="flex:1;min-width:0">
+          <div>Built and maintained by <b>fattygamer</b>, owner of <b>yeditsradio</b>.</div>
+          <a href="https://www.tiktok.com/@yeditsradio" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;color:#fff;
+             background:#010101;border:1px solid #2a2a2a;padding:6px 12px;border-radius:20px;
+             font-size:12.5px;font-weight:600;text-decoration:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.6h-3.16v13.9c0 1.62-1.32 2.95-2.95 2.95a2.95 2.95 0 01-2.95-2.95 2.95 2.95 0 012.95-2.95c.28 0 .55.04.8.11V9.98a6.16 6.16 0 00-.8-.05A6.16 6.16 0 003.1 16.1a6.16 6.16 0 006.16 6.15 6.16 6.16 0 006.16-6.15V9.01a9.4 9.4 0 005.48 1.76V7.6a5.83 5.83 0 01-4.3-1.78z"/></svg>
+            @yeditsradio on TikTok
+          </a>
+        </div>
+      </div></div>
   </div>
 </div></div>
 <script id="D" type="application/json">
@@ -771,7 +817,9 @@ function applyComps(objs){
 }
 
 /* ── sync ── */
+var lastSheetMsg='Live from Google Sheets', lastSheetState='';
 function setSheetBar(state,msg){
+  lastSheetState=state||''; lastSheetMsg=msg;
   var b=el('sb-edits'); if(!b)return;
   b.className='sheetbar'+(state?' '+state:'');
   b.querySelector('.msg').innerHTML=msg;
@@ -779,17 +827,22 @@ function setSheetBar(state,msg){
 }
 function runSync(loud){
   setSheetBar('busy','Loading from Google Sheets\u2026');
-  var jobs=[],rep=[];
+  var counts={edits:null,comps:null};
+  var jobs=[];
   if(SHEET_EDITS) jobs.push(fetch(SHEET_EDITS,{cache:'no-store'}).then(function(r){
     if(!r.ok)throw new Error('edits '+r.status);return r.text();})
-    .then(function(t){rep.push(applyEdits(csvObjects(t))+' edits');}));
+    .then(function(t){counts.edits=applyEdits(csvObjects(t));}));
   if(SHEET_COMPS) jobs.push(fetch(SHEET_COMPS,{cache:'no-store'}).then(function(r){
     if(!r.ok)throw new Error('comps '+r.status);return r.text();})
-    .then(function(t){rep.push(applyComps(csvObjects(t))+' comps');}));
+    .then(function(t){counts.comps=applyComps(csvObjects(t));}));
   if(!jobs.length){setSheetBar('err','No sheet configured');return;}
   return Promise.all(jobs).then(function(){
     BOARD=null;CBOARD=null;
-    setSheetBar('','Live from Google Sheets \u00b7 '+rep.join(' \u00b7 ')+
+    /* fixed order regardless of which fetch resolved first: comps, then edits, then time */
+    var parts=[];
+    if(counts.comps!=null) parts.push(counts.comps+' comps');
+    if(counts.edits!=null) parts.push(counts.edits+' edits');
+    setSheetBar('','Live from Google Sheets \u00b7 '+parts.join(' \u00b7 ')+
       ' \u00b7 '+new Date().toLocaleTimeString());
     drawEras();
     if(view==='board')drawBoard(); else if(view==='comps')drawMega(); else draw();
@@ -857,7 +910,9 @@ function rows(){
 function searchAll(k){
   k=k.toLowerCase();
   var scope=curEra;  /* when inside an era folder, every category stays scoped to it */
-  var songs=[],edits=[],comps=[],editors={};
+  var songs=[],edits=[],editors={};
+  /* comps are intentionally excluded from the Edits-tab search —
+     the Comps page has its own dedicated search for that */
   ERAS.forEach(function(e){
     if(scope && e.name!==scope) return;
     e.songs.forEach(function(s){
@@ -874,17 +929,7 @@ function searchAll(k){
       });
     });
   });
-  CERAS.forEach(function(e){
-    if(scope && e.name!==scope) return;
-    ['r','p','w','x'].forEach(function(t){
-      (e[t]||[]).forEach(function(c){
-        if((c.name&&c.name.toLowerCase().indexOf(k)>=0)||
-           (c.creator&&c.creator.toLowerCase().indexOf(k)>=0)||
-           (c.desc&&c.desc.toLowerCase().indexOf(k)>=0)) comps.push({e:e,c:c});
-      });
-    });
-  });
-  return {songs:songs,edits:edits,comps:comps,scoped:!!scope,
+  return {songs:songs,edits:edits,comps:[],scoped:!!scope,
     editors:Object.keys(editors).map(function(n){return {name:n,n:editors[n]};})
       .sort(function(a,b){return b.n-a.n;})};
 }
@@ -897,7 +942,7 @@ function statusChip(st){
 
 function drawSearch(){
   var r=searchAll(q), B=el('body'), h='';
-  var total=r.songs.length+r.edits.length+r.comps.length+r.editors.length;
+  var total=r.songs.length+r.edits.length+r.editors.length;
   el('top-ct').textContent=total.toLocaleString()+' results'+(r.scoped?' in '+curEra:'');
   if(!total){
     B.innerHTML='<div class="none">NO RESULTS<small>Nothing matches &ldquo;'+esc(q)+'&rdquo;'+
@@ -933,17 +978,7 @@ function drawSearch(){
         '<div class="sr-r"><span class="tt '+o.x.type+'">'+esc(o.x.type)+'</span></div></div>';
     }).join('');
   }
-  if(r.comps.length){
-    h+=head('Comps',r.comps.length);
-    h+=r.comps.slice(0,40).map(function(o,i){
-      return '<div class="sr" data-comp="'+i+'">'+
-        '<div class="sr-i" style="background:#d9272e">&#128193;</div>'+
-        '<div class="sr-b"><div class="sr-t">'+esc(o.c.name)+
-          (o.c.hl?'<span class="chip hl">&#9733;</span>':'')+statusChip(o.c.status)+'</div>'+
-        '<div class="sr-s">'+esc(o.c.creator)+' &middot; '+esc(o.e.name)+'</div></div>'+
-        '<div class="sr-r"><span class="mg-catpill cat-'+catSlug(o.c.cat)+'">'+esc(o.c.cat)+'</span></div></div>';
-    }).join('');
-  }
+  /* comps intentionally not shown in Edits-tab search results */
   if(r.editors.length){
     h+=head('Editors',r.editors.length);
     h+=r.editors.slice(0,25).map(function(o,i){
@@ -962,8 +997,6 @@ function drawSearch(){
   Array.prototype.forEach.call(B.querySelectorAll('[data-edit]'),function(n){
     n.onclick=function(){var o=r.edits[+n.getAttribute('data-edit')];
       curSong={era:o.e.name,color:o.e.color,s:o.s};curTab=o.s.p.indexOf(o.x)>=0?'p':'d';draw();};});
-  Array.prototype.forEach.call(B.querySelectorAll('[data-comp]'),function(n){
-    n.onclick=function(){var o=r.comps[+n.getAttribute('data-comp')];openComp(o.e.name,o.c);};});
   Array.prototype.forEach.call(B.querySelectorAll('[data-editor]'),function(n){
     n.onclick=function(){var o=r.editors[+n.getAttribute('data-editor')];
       setView('board');el('sq').value=o.name;q=o.name;drawBoard();};});
@@ -1190,21 +1223,21 @@ function drawMega(){
       '<div id="mg-search">'+MAG+'<input id="mg-q" placeholder="Search '+
         (era?esc(era.name):'all comps')+'" autocomplete="off" spellcheck="false"></div>'+
       '<div id="mg-av">Y</div></div>'+
-    '<div class="sheetbar"><span class="dot"></span><span class="msg" id="mg-sheetmsg">Live from Google Sheets</span>'+
+    '<div class="sheetbar '+esc(lastSheetState)+'" id="mg-sheetbar"><span class="dot"></span><span class="msg" id="mg-sheetmsg">'+esc(lastSheetMsg)+'</span>'+
       '<button class="rfr" data-refresh>Refresh</button></div>'+
-    '<div class="filters" id="mg-filters">'+
-      '<span class="f-lbl">Cat</span>'+
+    '<div id="mg-filters">'+
+      '<span class="mg-flbl">Type</span>'+
       ['Overhaul','Renovation','Vanilla-Style','Extension','Remix'].map(function(t){
-        return '<span class="pill'+(fType[t]?' on':'')+'" data-t="'+t+'">'+t+'s</span>';}).join('')+
-      '<span class="f-div"></span>'+
-      '<span class="pill'+(fFlag.hl?' on':'')+'" data-f="hl">&#9733; Highlights</span>'+
-      '<span class="f-div"></span>'+
-      '<span class="pill'+(fFlag.released?' on':'')+'" data-f="released">Released</span>'+
-      '<span class="pill'+(fFlag.wip?' on':'')+'" data-f="wip">WIP</span>'+
-      '<span class="pill'+(fFlag.cancelled?' on':'')+'" data-f="cancelled">Cancelled</span>'+
-      '<span class="pill'+(fFlag.outdated?' on':'')+'" data-f="outdated">Outdated</span>'+
-      '<span class="f-div"></span>'+
-      '<span class="pill clear" id="clr-comps">Clear filters</span>'+
+        return '<span class="mgpill'+(fType[t]?' on':'')+'" data-t="'+t+'">'+t+'s</span>';}).join('')+
+      '<span class="mg-fdiv"></span>'+
+      '<span class="mgpill'+(fFlag.hl?' on':'')+'" data-f="hl">&#9733; Highlights</span>'+
+      '<span class="mg-fdiv"></span>'+
+      '<span class="mgpill'+(fFlag.released?' on':'')+'" data-f="released">Released</span>'+
+      '<span class="mgpill'+(fFlag.wip?' on':'')+'" data-f="wip">WIP</span>'+
+      '<span class="mgpill'+(fFlag.cancelled?' on':'')+'" data-f="cancelled">Cancelled</span>'+
+      '<span class="mgpill'+(fFlag.outdated?' on':'')+'" data-f="outdated">Outdated</span>'+
+      '<span class="mg-fdiv"></span>'+
+      '<span class="mgpill clear" id="clr-comps">Clear filters</span>'+
     '</div>'+
     '<div id="mg-crumb">'+crumb+'</div>'+tabs+
     '<div id="mg-body" class="'+(mgView==='grid'&&era?'grid':'')+'" style="position:relative">'+
@@ -1302,6 +1335,9 @@ function bindMega(){
     n.onclick=function(){mgView=n.getAttribute('data-mv');drawMega();};});
   var qi=el('mg-q'); if(qi)qi.oninput=function(){mgQ=this.value;drawMgRows();};
   bindPills(el('mg-filters'),function(){mgSel=null;drawMega();});
+  var ccl=el('clr-comps'); if(ccl) ccl.onclick=function(){
+    fType={}; fFlag={}; mgSel=null; drawMega();
+  };
   bindMgRows();
 }
 function bindMgRows(){
@@ -1362,7 +1398,7 @@ function openMgInfo(x){
 /* ══════ SHARED PILL BINDING (true multi-select, never radio) ══════ */
 function bindPills(container, cb){
   if(!container) return;
-  Array.prototype.forEach.call(container.querySelectorAll('.pill[data-t],.pill[data-f]'), function(p){
+  Array.prototype.forEach.call(container.querySelectorAll('.pill[data-t],.pill[data-f],.mgpill[data-t],.mgpill[data-f]'), function(p){
     p.onclick = function(){
       var t=p.getAttribute('data-t'), f=p.getAttribute('data-f');
       if(t){ fType[t]=!fType[t]; p.classList.toggle('on', !!fType[t]); }
@@ -1373,7 +1409,7 @@ function bindPills(container, cb){
 }
 function clearAllFilters(){
   fType={}; fFlag={};
-  Array.prototype.forEach.call(document.querySelectorAll('.pill.on'), function(p){p.classList.remove('on');});
+  Array.prototype.forEach.call(document.querySelectorAll('.pill.on,.mgpill.on'), function(p){p.classList.remove('on');});
 }
 
 /* ══════ VIEW SWITCHING (single sheetbar, no split rendering) ══════ */
