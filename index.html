@@ -2172,12 +2172,13 @@ function truthy(v){ return /^(y|yes|true|1|x|\u2713|\u2b50)$/i.test(String(v||''
 function normUrl(u){
   u = String(u||'').trim();
   if(!u) return '';
-  // accept a plain share link and convert to published-csv guess
-  if(u.indexOf('output=csv') < 0 && u.indexOf('/pub') < 0){
-    var m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-    var g = u.match(/[#&]gid=(\d+)/);
-    if(m) return 'https://docs.google.com/spreadsheets/d/'+m[1]+'/gviz/tq?tqx=out:csv'+(g?'&gid='+g[1]:'');
-  }
+  // already a CSV feed (gviz, export, or published) — leave it exactly as-is
+  if(/gviz|output=csv|format=csv|\/pub/.test(u)) return u;
+  // plain share link — build a gviz CSV feed, with an explicit single header row
+  var m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  var g = u.match(/[#&?]gid=(\d+)/);
+  if(m) return 'https://docs.google.com/spreadsheets/d/'+m[1]+
+    '/gviz/tq?tqx=out:csv&headers=1'+(g?'&gid='+g[1]:'');
   return u;
 }
 
