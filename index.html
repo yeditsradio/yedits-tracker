@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1e1f22">
+<title>Yedits Tracker</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rail:#1e1f22;--side:#2b2d31;--chat:#313338;--input:#383a40;--hov:#35373c;--sel:#404249;
+  --embed:#2b2d31;--line:#3f4147;
+  --tx:#f2f3f5;--tx2:#dbdee1;--tx3:#b5bac1;--mut:#949ba4;--fnt:#80848e;--dim:#4e5058;
+  --bl:#5865f2;--bl2:#4752c4;--grn:#23a55a;--red:#f23f43;--yel:#f0b132;
+  --ov:#f23f43;--rn:#f0883e;--vn:#23a55a;--ex:#00a8fc;--rx:#c07ef5;
+  --gold:#ffcc00;--amber:#f0b132;--purp:#c07ef5;--rust:#8a5a2b;
+  --sh:44px;
+}
+html,body{height:100%;overflow:hidden;background:var(--chat);color:var(--tx2);
+  font-family:'Noto Sans',system-ui,sans-serif;font-size:16px;line-height:1.375;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(88,101,242,.35)}
+#app{display:flex;height:100dvh;overflow:hidden}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* ── RAIL ── */
+#rail{width:72px;min-width:72px;background:var(--rail);display:flex;flex-direction:column;
+  align-items:center;padding:12px 0;gap:8px;z-index:60;overflow:visible}
+.rl{width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;background:var(--side);color:var(--tx2);font-size:17px;font-weight:600;
+  flex-shrink:0;text-decoration:none;transition:border-radius .15s,background-color .15s,color .15s}
+.rl:hover,.rl.on{border-radius:16px;background:var(--bl);color:#fff}
+#r-comps.on{background:#d9272e}
+#r-board.on{background:#f6931e;color:#1a1a1a}
+.rl::before{content:'';position:absolute;left:-16px;width:8px;border-radius:0 4px 4px 0;background:#fff;
+  height:0;transition:height .18s cubic-bezier(.2,.9,.3,1)}
+.rl:hover::before{height:20px}.rl.on::before{height:40px}
+.rl .tip{position:absolute;left:60px;background:#111214;color:#fff;font-size:15px;font-weight:600;
+  padding:8px 12px;border-radius:5px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .1s;
+  box-shadow:0 8px 16px rgba(0,0,0,.24);z-index:99}
+.rl:hover .tip{opacity:1}
+.rl-sep{width:32px;height:2px;background:#35373c;border-radius:1px;flex-shrink:0}
+
+/* ── SIDEBAR ── */
+#side{width:240px;min-width:240px;background:var(--side);display:flex;flex-direction:column;overflow:hidden}
+#shdr{height:48px;padding:0 16px;display:flex;align-items:center;cursor:pointer;flex-shrink:0;
+  box-shadow:0 1px 0 rgba(4,4,5,.2)}
+#shdr:hover{background:var(--hov)}
+#brand{font-size:16px;font-weight:600;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#fw{padding:8px}
+#era-find{width:100%;background:#1e1f22;border:none;border-radius:4px;outline:none;color:var(--tx2);
+  font:500 14px 'Noto Sans',sans-serif;padding:7px 8px}
+#era-find::placeholder{color:var(--fnt)}
+#era-list{overflow-y:auto;flex:1;padding:0 0 20px 8px}
+#era-list::-webkit-scrollbar{width:8px}
+#era-list::-webkit-scrollbar-thumb{background:#1a1b1e;border-radius:4px;border:2px solid var(--side);background-clip:padding-box}
+.sec-lbl{font-size:12px;font-weight:600;color:var(--mut);text-transform:uppercase;padding:16px 8px 4px;
+  display:flex;align-items:center;gap:4px}
+.sec-lbl::before{content:'\25BE';font-size:9px}
+.era{display:flex;align-items:center;gap:6px;padding:6px 8px;margin:1px 8px 1px 0;border-radius:4px;
+  cursor:pointer;min-width:0;transition:background-color .1s}
+.era::before{content:'#';font-size:19px;color:var(--fnt);flex-shrink:0;line-height:1;width:20px;text-align:center}
+.era:hover{background:var(--hov)}.era:hover::before{color:var(--tx3)}
+.era.on{background:var(--sel)}.era.on::before{color:var(--tx)}
+.era-nm{font-size:16px;font-weight:500;color:var(--mut);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;flex:1;line-height:20px}
+.era:hover .era-nm{color:var(--tx2)}.era.on .era-nm{color:#fff}
+.era-bar{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.era-ct{font-size:12px;font-weight:600;color:var(--fnt);flex-shrink:0;font-family:'JetBrains Mono',monospace}
+
+/* ── MAIN ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#top{height:48px;padding:0 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;
+  box-shadow:0 1px 0 rgba(4,4,5,.2);z-index:6;background:var(--chat)}
+#burger{display:none;width:34px;height:34px;border:none;background:none;color:var(--tx2);font-size:20px;
+  cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;border-radius:4px}
+#burger:hover{background:var(--hov)}
+#crumb{display:flex;align-items:center;gap:8px;min-width:0;font-size:16px;overflow:hidden}
+#crumb::before{content:'#';font-size:24px;color:var(--fnt);flex-shrink:0;line-height:1}
+.cr{color:var(--mut);cursor:pointer;white-space:nowrap;font-weight:600}
+.cr:hover{color:var(--tx)}
+.cr.now{color:#fff;font-weight:700;cursor:default;overflow:hidden;text-overflow:ellipsis}
+.cr-s{color:var(--dim);font-size:14px}
+#top-ct{margin-left:auto;font-size:12px;font-weight:600;color:var(--mut);flex-shrink:0;
+  font-family:'JetBrains Mono',monospace;padding-left:12px;border-left:1px solid var(--line)}
+
+/* ── SHEET BAR ── */
+.sheetbar{display:flex;align-items:center;gap:10px;padding:7px 16px;background:rgba(35,165,90,.1);
+  border-bottom:1px solid rgba(35,165,90,.2);color:#4ad182;font-size:12.5px;font-weight:600;flex-shrink:0}
+.sheetbar .dot{width:7px;height:7px;border-radius:50%;background:var(--grn);flex-shrink:0}
+.sheetbar.busy{background:rgba(88,101,242,.1);border-color:rgba(88,101,242,.25);color:#a3adf7}
+.sheetbar.busy .dot{background:var(--bl)}
+.sheetbar.err{background:rgba(242,63,67,.1);border-color:rgba(242,63,67,.25);color:#ff8a8d}
+.sheetbar.err .dot{background:var(--red)}
+.sheetbar .msg{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rfr{margin-left:auto;font:600 12px 'Noto Sans',sans-serif;padding:4px 12px;border-radius:4px;
+  border:1px solid currentColor;background:none;color:inherit;cursor:pointer;flex-shrink:0}
+.rfr:hover{background:rgba(255,255,255,.08)}
+
+/* ── FILTERS ── */
+.filters{padding:8px 16px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex-shrink:0;
+  background:var(--chat);border-bottom:1px solid rgba(255,255,255,.05)}
+.f-lbl{font-size:11px;font-weight:700;color:var(--fnt);text-transform:uppercase;margin-right:4px;flex-shrink:0}
+.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:4px;border:none;background:var(--input);
+  color:var(--tx3);cursor:pointer;transition:background-color .12s,color .12s;user-select:none;white-space:nowrap}
+.pill:hover{background:var(--sel);color:var(--tx)}
+.pill.on{color:#fff}
+.pill.on[data-t="Overhaul"]{background:var(--ov)}
+.pill.on[data-t="Renovation"]{background:var(--rn);color:#1a1a1a}
+.pill.on[data-t="Vanilla-Style"]{background:var(--vn)}
+.pill.on[data-t="Extension"]{background:var(--ex)}
+.pill.on[data-t="Remix"]{background:var(--rx);color:#1a1a1a}
+.pill.on[data-f="hl"]{background:var(--gold);color:#1a1400}
+.pill.on[data-f="incomp"]{background:var(--bl)}
+.pill.on[data-f="nocomp"]{background:var(--dim);color:var(--tx)}
+.pill.on[data-f="single"]{background:var(--purp);color:#1a0f2a}
+.pill.on[data-f="released"]{background:var(--grn)}
+.pill.on[data-f="wip"]{background:var(--amber);color:#1a1400}
+.pill.on[data-f="cancelled"]{background:var(--red)}
+.pill.on[data-f="outdated"]{background:var(--rust);color:#fff}
+.pill.on[data-f]{background:var(--bl)}
+.pill.clear{background:transparent;border:1px solid var(--line);color:var(--fnt)}
+.pill.clear:hover{background:var(--input);color:var(--tx2)}
+.pill.clear.show{display:inline-block}
+.pill.clear.hide{display:none}
+.f-div{width:1px;height:16px;background:var(--line);margin:0 4px;flex-shrink:0}
+
+/* ── LIST / MESSAGES ── */
+#body{flex:1;overflow-y:auto;padding:0 0 24px}
+#body::-webkit-scrollbar{width:16px}
+#body::-webkit-scrollbar-thumb{background:#1a1b1e;border-radius:8px;border:4px solid transparent;background-clip:padding-box}
+.grp{display:flex;align-items:center;padding:24px 16px 8px}
+.grp-l{flex:1;height:1px;background:var(--line)}
+.grp-t{font-size:12px;font-weight:700;color:var(--mut);white-space:nowrap;padding:2px 10px;
+  display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.03em}
+.grp-d{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.song{display:flex;align-items:flex-start;gap:16px;padding:6px 16px;cursor:pointer;position:relative;
+  transition:background-color .06s;min-height:44px}
+.song:hover{background:rgba(2,2,2,.06)}
+.song::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:transparent}
+.song:hover::before{background:var(--sc,transparent)}
+.song-i{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:14px;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);margin-top:2px}
+.song-b{flex:1;min-width:0;padding-top:2px}
+.song-n{font-size:16px;font-weight:500;color:var(--tx);overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;display:flex;align-items:center;gap:7px}
+.song-n b{font-weight:600;color:#fff}
+.song-m{font-size:12px;color:var(--fnt);margin-top:2px}
+.song-r{display:flex;gap:10px;align-items:center;flex-shrink:0;padding-top:8px}
+.dots{display:flex;gap:3px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--input)}
+.tally{font-size:12px;font-weight:600;color:var(--fnt);min-width:52px;text-align:right;
+  font-family:'JetBrains Mono',monospace}
+
+/* ── DETAIL ── */
+#dt-head{padding:24px 20px 0;background:var(--chat);border-bottom:1px solid var(--line)}
+#dt-era{font-size:12px;font-weight:700;text-transform:uppercase;display:flex;align-items:center;gap:7px;margin-bottom:8px}
+#dt-era-d{width:10px;height:10px;border-radius:50%}
+#dt-name{font-size:30px;font-weight:700;line-height:1.2;color:#fff;letter-spacing:-.02em}
+#dt-meta{font-size:13px;color:var(--mut);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#dt-tabs{display:flex;gap:8px;margin-top:18px;overflow-x:auto}
+.dtab{padding:8px 14px 10px;font-size:15px;font-weight:600;color:var(--mut);cursor:pointer;
+  border-bottom:2px solid transparent;display:flex;align-items:center;gap:8px;white-space:nowrap;margin-bottom:-1px}
+.dtab:hover{color:var(--tx2)}
+.dtab.on{color:#fff;border-bottom-color:var(--bl)}
+.dtab-n{font-size:11px;font-weight:700;background:var(--input);padding:2px 7px;border-radius:8px;
+  color:var(--tx3);font-family:'JetBrains Mono',monospace}
+.dtab.on .dtab-n{background:var(--bl);color:#fff}
+#dt-body{padding:20px 20px 48px;max-width:900px}
+.slot-note{font-size:13px;color:var(--mut);margin-bottom:16px;line-height:1.5}
+
+/* ── EMBED CARD ── */
+.ed{background:var(--embed);border-radius:4px;padding:14px 16px 14px 12px;margin-bottom:8px;
+  display:flex;gap:14px;align-items:flex-start;border-left:4px solid var(--dim);max-width:700px;
+  transition:background-color .12s}
+.ed:hover{background:#313338}
+.ed.Overhaul{border-left-color:var(--ov)}.ed.Renovation{border-left-color:var(--rn)}
+.ed.Vanilla-Style{border-left-color:var(--vn)}.ed.Extension{border-left-color:var(--ex)}
+.ed.Remix{border-left-color:var(--rx)}
+.ed.out{opacity:.72}
+.rank{min-width:38px;height:38px;padding:0 6px;border-radius:19px;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center;font-size:16px;font-weight:700;background:var(--input);
+  color:var(--tx3);margin-top:1px;font-family:'JetBrains Mono',monospace}
+.rank.r1{background:var(--yel);color:#1a1a1a}
+.rank.r2{background:#b9bbbe;color:#1a1a1a}
+.rank.r3{background:#cd7f32;color:#fff}
+.rank.hm{font-size:12px;background:#4a4d54;color:#c9ccd1}
+.ed-b{flex:1;min-width:0}
+.ed-t{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ed-n{font-size:16px;font-weight:600;color:#fff;line-height:1.375}
+.ed-c{font-size:12px;font-weight:500;color:var(--mut);background:var(--input);padding:1px 6px;border-radius:3px}
+.ed-d{font-size:14px;color:var(--tx3);line-height:1.5;margin-top:6px;overflow-wrap:anywhere}
+.ed-f{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.tt{font-size:11px;font-weight:700;padding:3px 8px;border-radius:3px;color:#fff}
+.tt.Overhaul{background:var(--ov)}.tt.Renovation{background:var(--rn);color:#1a1a1a}
+.tt.Vanilla-Style{background:var(--vn)}.tt.Extension{background:var(--ex)}
+.tt.Remix{background:var(--rx);color:#1a1a1a}
+.chip{font-size:11px;font-weight:700;padding:3px 8px;border-radius:3px;display:inline-flex;
+  align-items:center;gap:5px;white-space:nowrap}
+.chip.hl{background:rgba(240,177,50,.18);color:var(--yel)}
+.chip.comp{background:rgba(88,101,242,.2);color:#a3adf7;cursor:pointer}
+.chip.comp:hover{background:rgba(88,101,242,.35);color:#fff}
+.chip.single{background:rgba(192,126,245,.2);color:#d6a8ff}
+.chip.out{background:rgba(138,109,59,.28);color:#e0b96b}
+.chip.st-released{background:rgba(35,165,90,.2);color:#4ad182}
+.chip.st-wip{background:rgba(240,177,50,.2);color:var(--yel)}
+.chip.st-cancelled{background:rgba(242,63,67,.2);color:#ff8a8d}
+.chip.grade{background:var(--input);color:var(--tx2)}
+.dl{font-size:13px;font-weight:600;padding:5px 14px;border-radius:3px;background:var(--bl);color:#fff;
+  text-decoration:none;transition:background-color .15s}
+.dl:hover{background:var(--bl2)}
+.dl.sec{background:var(--input);color:var(--tx2)}
+.dl.sec:hover{background:var(--sel)}
+.slot-empty{border:1px dashed var(--line);border-radius:4px;padding:14px 16px;margin-bottom:8px;
+  display:flex;align-items:center;gap:14px;color:var(--fnt);font-size:14px;max-width:700px}
+.slot-empty .rank{background:var(--input);color:var(--dim)}
+.none{padding:70px 20px;text-align:center;color:var(--mut);font-size:20px;font-weight:600}
+.none small{display:block;font-size:14px;font-weight:400;margin-top:8px;color:var(--fnt)}
+
+/* ── SEARCH ── */
+#sbar{padding:0 16px 20px;flex-shrink:0;background:var(--chat)}
+#sw{display:flex;align-items:center;gap:12px;background:var(--input);border-radius:8px;padding:0 16px}
+#sq{flex:1;background:none;border:none;outline:none;color:var(--tx);font-size:16px;padding:11px 0;font-family:inherit}
+#sq::placeholder{color:var(--fnt)}
+#sx{background:none;border:none;color:var(--mut);cursor:pointer;font-size:18px;padding:0;display:none}
+.si{color:var(--mut);font-size:20px;flex-shrink:0}
+kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:2px 6px;color:var(--fnt);
+  font-family:'JetBrains Mono',monospace}
+
+/* search results */
+.sr-h{display:flex;align-items:center;gap:9px;padding:20px 16px 7px;font-size:12px;font-weight:700;
+  color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.sr-h .n{background:var(--input);padding:1px 8px;border-radius:10px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--tx3)}
+.sr-h .ln{flex:1;height:1px;background:var(--line)}
+.sr{display:flex;align-items:center;gap:13px;padding:7px 16px;cursor:pointer;transition:background-color .08s}
+.sr:hover{background:rgba(2,2,2,.06)}
+.sr-i{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.sr-b{flex:1;min-width:0}
+.sr-t{font-size:15px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;display:flex;align-items:center;gap:7px}
+.sr-s{font-size:12px;color:var(--fnt);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-r{flex-shrink:0;display:flex;gap:5px;align-items:center}
+
+/* ═══ COMPS / MEGA ═══ */
+#mg{display:none;flex:1;overflow:hidden;flex-direction:column;background:#121212;color:#e8e8e8;
+  --mgr:#d9272e;--mg2:#1b1b1b;--mgl:#2c2c2c;--mgt2:#a8a8a8;--mgt3:#6f6f6f}
+#mg.on{display:flex;min-height:0}
+#mg-top{display:flex;align-items:center;gap:14px;padding:12px 20px;flex-shrink:0}
+#mg-logo{width:34px;height:34px;border-radius:50%;background:#d9272e;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:17px}
+#mg-search{flex:1;max-width:720px;position:relative;display:flex;align-items:center}
+#mg-search svg{position:absolute;left:14px;pointer-events:none}
+#mg-q{width:100%;background:#1e1e1e;border:1px solid #303030;border-radius:8px;outline:none;color:#f2f2f2;
+  font:14px 'Noto Sans',sans-serif;padding:9px 14px 9px 40px}
+#mg-q:focus{border-color:#4a4a4a;background:#232323}
+#mg-q::placeholder{color:var(--mgt3)}
+#mg-av{width:32px;height:32px;border-radius:50%;background:#d9272e;color:#fff;display:flex;
+  align-items:center;justify-content:center;font-size:14px;font-weight:600;margin-left:auto;flex-shrink:0}
+#mg-crumb{display:flex;align-items:center;gap:7px;padding:0 20px 12px;font-size:15px;flex-shrink:0}
+.mgc{color:var(--mgt2);cursor:pointer;font-weight:600;white-space:nowrap}
+.mgc:hover{color:#f2f2f2}
+.mgc.now{color:#f2f2f2;font-weight:700;cursor:default}
+.mgc-s{color:var(--mgt3);font-size:13px}
+#mg-tabs{display:flex;gap:8px;padding:0 20px 12px;flex-shrink:0;align-items:center;overflow-x:auto}
+.mgtab{padding:7px 15px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;background:#1e1e1e;
+  border:1px solid #2e2e2e;color:var(--mgt2);display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0}
+.mgtab:hover{background:#262626;color:#f2f2f2}
+.mgtab.on{background:#2f2f2f;border-color:#4a4a4a;color:#fff}
+.mgtab-n{font-size:11px;font-weight:700;background:#3a3a3a;padding:1px 7px;border-radius:10px;
+  color:var(--mgt2);font-family:'JetBrains Mono',monospace}
+.mgtab.on .mgtab-n{background:var(--mgr);color:#fff}
+
+/* comps filter pills — native MEGA look (dark rounded pill),
+   but reusing the exact same semantic colours as the Edits page pills */
+#mg-filters{padding:8px 20px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.mg-flbl{font-size:10.5px;font-weight:700;color:var(--mgt3);text-transform:uppercase;
+  letter-spacing:.04em;margin-right:2px;flex-shrink:0}
+.mg-fdiv{width:1px;height:15px;background:var(--mgl);margin:0 4px;flex-shrink:0}
+.mgpill{font-size:12px;font-weight:600;padding:5px 12px;border-radius:14px;
+  background:#1e1e1e;border:1px solid #2e2e2e;color:var(--mgt2);cursor:pointer;
+  transition:background-color .12s,color .12s,border-color .12s;user-select:none;white-space:nowrap}
+.mgpill:hover{background:#262626;border-color:#3a3a3a;color:#f2f2f2}
+.mgpill.on{color:#fff;border-color:transparent}
+.mgpill.on[data-t="Overhaul"]{background:var(--ov)}
+.mgpill.on[data-t="Renovation"]{background:var(--rn);color:#1a1a1a}
+.mgpill.on[data-t="Vanilla-Style"]{background:var(--vn)}
+.mgpill.on[data-t="Extension"]{background:var(--ex)}
+.mgpill.on[data-t="Remix"]{background:var(--rx);color:#1a1a1a}
+.mgpill.on[data-f="hl"]{background:var(--gold);color:#1a1400}
+.mgpill.on[data-f="released"]{background:var(--grn)}
+.mgpill.on[data-f="wip"]{background:var(--amber);color:#1a1400}
+.mgpill.on[data-f="cancelled"]{background:var(--red)}
+.mgpill.on[data-f="outdated"]{background:var(--rust);color:#fff}
+.mgpill.clear{background:transparent;border:1px solid var(--mgl);color:var(--mgt3)}
+.mgpill.clear:hover{background:#1e1e1e;color:var(--mgt2)}
+#mg-view{margin-left:auto;display:flex;gap:4px}
+.mgv{width:32px;height:30px;border-radius:6px;border:none;background:transparent;color:var(--mgt3);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
+.mgv:hover{background:#242424;color:var(--mgt2)}.mgv.on{color:#f2f2f2}
+#mg-body{flex:1;overflow-y:auto;padding:0 0 40px}
+#mg-body::-webkit-scrollbar{width:12px}
+#mg-body::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:6px;border:3px solid #121212;background-clip:padding-box}
+.mg-head{display:flex;align-items:center;gap:14px;padding:0 20px 8px;border-bottom:1px solid var(--mgl);
+  font-size:12px;font-weight:600;color:var(--mgt3);position:sticky;top:0;background:#121212;z-index:4;height:34px}
+.mg-h-nm{flex:1;min-width:0;display:flex;align-items:center;gap:5px}
+.mg-h-nm::after{content:'\2191';font-size:11px;color:var(--mgt2)}
+.mg-h-cat{width:150px;flex-shrink:0}.mg-h-by{width:190px;flex-shrink:0}.mg-h-src{width:140px;flex-shrink:0}
+.mgr{display:flex;align-items:center;gap:14px;padding:0 20px;min-height:52px;cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.035);transition:background-color .1s}
+.mgr:hover{background:var(--mg2)}
+.mgr.sel{background:#252525}
+.mgr.out{opacity:.72}
+.mg-ico{width:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.mg-nm{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 0}
+.mg-nm-t{font-size:14px;font-weight:500;color:#f2f2f2;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;display:flex;align-items:center;gap:7px}
+.mg-nm-s{font-size:11.5px;color:var(--mgt3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mg-rank{min-width:22px;height:22px;padding:0 6px;border-radius:11px;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center;font-size:11px;font-weight:700;background:#2e2e2e;
+  color:var(--mgt2);font-family:'JetBrains Mono',monospace}
+.mg-rank.r1{background:#ffcc00;color:#1a1a1a}.mg-rank.r2{background:#c4c4c4;color:#1a1a1a}
+.mg-rank.r3{background:#cd7f32;color:#fff}
+.mg-grade{width:22px;height:22px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.mg-grade.A{background:#00bfa5;color:#06231f}.mg-grade.B{background:#3d9dff;color:#04203d}
+.mg-grade.C{background:#f0883e;color:#2b1503}
+.mg-cat{width:150px;flex-shrink:0;overflow:hidden}
+.mg-catpill{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:11px;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-Overhauls{background:rgba(242,63,67,.16);color:#ff6b6e}
+.cat-Renovations{background:rgba(240,136,62,.16);color:#ffa15c}
+.cat-Extensions{background:rgba(61,157,255,.16);color:#6bb6ff}
+.cat-Vanilla-style{background:rgba(35,165,90,.16);color:#4ad182}
+.cat-Remixes{background:rgba(192,126,245,.16);color:#cf9bf8}
+.cat-Honorable-Mentions{background:rgba(160,160,160,.14);color:#a0a0a0}
+.mg-by{width:190px;flex-shrink:0;font-size:12.5px;color:var(--mgt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mg-src{width:140px;flex-shrink:0;display:flex;gap:5px;align-items:center;overflow:hidden;flex-wrap:wrap}
+.mg-tag{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:#2a2a2a;
+  color:var(--mgt2);white-space:nowrap}
+.mg-tag.mega{background:rgba(217,39,46,.18);color:#ff6165}
+.mg-star{color:#ffcc00;font-size:13px;flex-shrink:0}
+.mg-empty{display:flex;align-items:center;gap:14px;padding:0 20px;height:52px;
+  border-bottom:1px solid rgba(255,255,255,.02);color:var(--mgt3);font-size:13px}
+#mg-body.grid .mg-head{display:none}
+#mg-body.grid .mg-rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;padding:16px 20px}
+#mg-body.grid .mgr{flex-direction:column;height:auto;padding:16px 12px 14px;border:1px solid var(--mgl);
+  border-radius:10px;gap:10px;align-items:center;text-align:center;background:var(--mg2)}
+#mg-body.grid .mg-ico svg{width:56px;height:46px}
+#mg-body.grid .mg-nm{align-items:center;text-align:center}
+#mg-body.grid .mg-nm-t{white-space:normal;justify-content:center;display:-webkit-box;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#mg-body.grid .mg-nm-s{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#mg-body.grid .mg-cat,#mg-body.grid .mg-by{width:auto;max-width:100%}
+#mg-body.grid .mg-src{width:auto;justify-content:center}
+#mg-info{position:absolute;right:0;top:0;bottom:0;width:340px;background:#1a1a1a;border-left:1px solid var(--mgl);
+  display:flex;flex-direction:column;overflow:hidden;transform:translateX(100%);
+  transition:transform .22s cubic-bezier(.2,.9,.3,1);z-index:20}
+#mg-info.on{transform:none}
+#mgi-h{padding:16px 18px 14px;border-bottom:1px solid var(--mgl);display:flex;gap:12px;align-items:flex-start;flex-shrink:0}
+#mgi-x{background:none;border:none;color:var(--mgt3);cursor:pointer;font-size:20px;margin-left:auto;flex-shrink:0}
+#mgi-t{font-size:15px;font-weight:600;color:#fff;line-height:1.35;overflow-wrap:anywhere}
+#mgi-s{font-size:12px;color:var(--mgt3);margin-top:4px}
+#mgi-b{flex:1;overflow-y:auto;padding:16px 18px 24px}
+#mgi-b::-webkit-scrollbar{width:8px}
+#mgi-b::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:4px}
+.mgi-l{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--mgt3);margin:16px 0 7px}
+.mgi-l:first-child{margin-top:0}
+.mgi-d{font-size:13.5px;color:var(--mgt2);line-height:1.6;overflow-wrap:anywhere}
+.mgi-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
+.mgi-row span:first-child{color:var(--mgt3);flex-shrink:0}
+.mgi-row span:last-child{color:#f2f2f2;font-weight:500;text-align:right;overflow-wrap:anywhere}
+.mgi-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;
+  border-radius:8px;border:none;background:var(--mgr);color:#fff;font:600 14px 'Noto Sans',sans-serif;
+  cursor:pointer;text-decoration:none;margin-bottom:8px}
+.mgi-btn:hover{background:#b81f26}
+.mgi-btn.ghost{background:transparent;border:1px solid #3a3a3a;color:#f2f2f2}
+.mgi-btn.ghost:hover{background:#242424}
+.link-row{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;background:#232323;
+  margin-bottom:5px;cursor:pointer;font-size:13px;color:var(--mgt2);transition:background-color .12s}
+.link-row:hover{background:#2c2c2c;color:#fff}
+.link-row .ic{font-size:14px;flex-shrink:0}
+.link-row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ═══ LEADERBOARD — FL STUDIO ═══ */
+#lb{display:none;overflow-y:auto;flex:1;background:#3a3a3a;
+  background-image:linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px);background-size:100% 3px;
+  --flo:#f6931e;--flo2:#ffb454;--flt:#dcdcdc;--flt2:#9c9c9c;--flt3:#6e6e6e}
+#lb.on{display:block}
+#lb::-webkit-scrollbar{width:15px}
+#lb::-webkit-scrollbar-track{background:#2e2e2e;border-left:1px solid #1c1c1c}
+#lb::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#5c5c5c,#484848);border:1px solid #2a2a2a;
+  border-radius:2px;box-shadow:inset 1px 1px 0 rgba(255,255,255,.14),inset -1px -1px 0 rgba(0,0,0,.5)}
+#lb-head{padding:0;margin:10px 12px 0}
+#lb-t{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#f0f0f0;
+  padding:7px 12px;background:linear-gradient(180deg,#5e5e5e,#494949 48%,#3f3f3f 52%,#454545);
+  border:1px solid #262626;border-radius:3px 3px 0 0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(0,0,0,.3);
+  text-shadow:0 -1px 0 rgba(0,0,0,.65);display:flex;align-items:center;gap:9px}
+#lb-t::before{content:'';width:9px;height:9px;border-radius:50%;flex-shrink:0;
+  background:radial-gradient(circle at 35% 30%,#ffd08a,var(--flo) 55%,#a55c05);
+  box-shadow:0 0 7px rgba(246,147,30,.85)}
+#lb-modes{display:flex;gap:0;background:linear-gradient(180deg,#464646,#3e3e3e);border:1px solid #262626;
+  border-top:none;padding:6px 10px;gap:6px}
+.lbm{font-size:11px;font-weight:700;padding:5px 14px;border-radius:2px;cursor:pointer;
+  background:linear-gradient(180deg,#3a3a3a,#303030);border:1px solid #242424;color:var(--flt2);
+  text-shadow:0 -1px 0 rgba(0,0,0,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  text-transform:uppercase;letter-spacing:.08em;transition:none}
+.lbm:hover{color:var(--flt)}
+.lbm.on{background:linear-gradient(180deg,#f6931e,#c9760f);color:#241300;border-color:#8a5208;
+  text-shadow:0 1px 0 rgba(255,255,255,.25)}
+#lb-s{font-size:10.5px;color:var(--flt2);padding:9px 12px;background:linear-gradient(180deg,#464646,#3e3e3e);
+  border:1px solid #262626;border-top:none;line-height:1.65;text-shadow:0 -1px 0 rgba(0,0,0,.4)}
+#lb-body{padding:0 12px 40px}
+.lb-cols{display:flex;align-items:center;background:linear-gradient(180deg,#3a3a3a,#333);
+  border:1px solid #262626;border-top:none;font-size:9px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--flt3);text-shadow:0 -1px 0 rgba(0,0,0,.5);height:22px}
+.lb-cols>div{padding:0 8px;line-height:22px;border-right:1px solid rgba(0,0,0,.35);
+  box-shadow:inset -1px 0 0 rgba(255,255,255,.045);height:100%}
+.lb-cols>div:last-child{border-right:none;box-shadow:none}
+.lb-c-pos{width:44px;flex-shrink:0;text-align:center}
+.lb-c-nm{flex:1;min-width:0}
+.lb-c-ty,.lb-tycol{width:250px;flex-shrink:0}
+.lb-c-t{width:40px;text-align:center;flex-shrink:0}
+.lb-c-e{width:46px;text-align:center;flex-shrink:0}
+.lb-c-p{width:132px;text-align:center;flex-shrink:0}
+.lbr{display:flex;align-items:stretch;margin:0 0 -1px;background:linear-gradient(180deg,#4d4d4d,#464646 50%,#414141 51%,#3c3c3c);
+  border:1px solid #2a2a2a;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.28);min-height:52px}
+.lbr:hover{background:linear-gradient(180deg,#575757,#505050 50%,#4a4a4a 51%,#454545)}
+.lbr.top1{box-shadow:inset 0 1px 0 rgba(255,200,120,.28),inset 0 -1px 0 rgba(0,0,0,.28),inset 3px 0 0 var(--flo)}
+.lbr.top2{box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -1px 0 rgba(0,0,0,.28),inset 3px 0 0 #b8b8b8}
+.lbr.top3{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.28),inset 3px 0 0 #b5762e}
+.lbr>*{border-right:1px solid rgba(0,0,0,.3);box-shadow:inset -1px 0 0 rgba(255,255,255,.04)}
+.lbr>*:last-child{border-right:none;box-shadow:none}
+.lb-pos{width:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--flo2);
+  background:linear-gradient(180deg,#191919,#101010);text-shadow:0 0 7px rgba(246,147,30,.75);
+  box-shadow:inset 1px 1px 2px rgba(0,0,0,.85)}
+.lbr.top1 .lb-pos{color:#ffcb6b}
+.lb-av{width:34px;height:34px;border-radius:2px;flex-shrink:0;align-self:center;margin:0 9px;display:flex;
+  align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;
+  font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.75);border:1px solid rgba(0,0,0,.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -6px 10px rgba(0,0,0,.25)}
+.lb-nm{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:6px 10px 6px 0}
+.lb-nm-t{font-size:13px;font-weight:600;color:#f2f2f2;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;text-shadow:0 -1px 0 rgba(0,0,0,.6)}
+.lbr.top1 .lb-nm-t{color:var(--flo2)}
+.lb-nm-s{font-size:9.5px;color:var(--flt3);margin-top:3px;text-transform:uppercase;font-weight:600}
+.lb-tycol{display:flex;flex-direction:column;justify-content:center;padding:6px 10px}
+.lb-ty{display:flex;gap:3px;align-items:center}
+.tychip{display:flex;flex-direction:column;align-items:center;font-family:'JetBrains Mono',monospace;
+  font-weight:700;padding:3px 0 2px;border-radius:2px;width:44px;flex-shrink:0;
+  background:linear-gradient(180deg,#2a2a2a,#1e1e1e);border:1px solid #151515;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 2px rgba(0,0,0,.5)}
+.tychip .sw{width:100%;height:3px;margin-bottom:3px;flex-shrink:0;box-shadow:0 0 5px currentColor}
+.tychip.z{background:linear-gradient(180deg,#333,#292929)}
+.tychip.z .sw{opacity:.22;box-shadow:none}
+.tybar{display:flex;height:5px;overflow:hidden;margin-top:5px;width:100%;max-width:230px;background:#1a1a1a;
+  border:1px solid #131313;box-shadow:inset 0 1px 2px rgba(0,0,0,.7)}
+.tybar i{display:block;height:100%;box-shadow:inset 0 1px 0 rgba(255,255,255,.28)}
+.lb-t{width:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+  background:linear-gradient(180deg,#181818,#0f0f0f);box-shadow:inset 1px 1px 2px rgba(0,0,0,.8)}
+.lb-t.z{color:#333}
+.t-g{color:#ffc247;text-shadow:0 0 7px rgba(255,194,71,.8)}
+.t-s{color:#d8d8d8;text-shadow:0 0 7px rgba(216,216,216,.55)}
+.t-b{color:#e08c3c;text-shadow:0 0 7px rgba(224,140,60,.65)}
+.t-d{color:#8ea7c4;text-shadow:0 0 6px rgba(142,167,196,.45)}
+.lb-e{width:46px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--flt2)}
+.lb-p{width:132px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:8px 9px}
+.pk-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;text-align:right;
+  color:var(--flo2);text-shadow:0 0 8px rgba(246,147,30,.7);background:linear-gradient(180deg,#181818,#0f0f0f);
+  border:1px solid #0c0c0c;border-radius:2px;padding:2px 6px;box-shadow:inset 1px 1px 2px rgba(0,0,0,.85)}
+.lbr.top1 .pk-val{color:#ffd27a}
+.pk-meter{height:9px;background:#141414;border:1px solid #0d0d0d;box-shadow:inset 0 1px 3px rgba(0,0,0,.85);
+  position:relative;overflow:hidden}
+.pk-fill{position:absolute;left:0;top:0;bottom:0;
+  background:linear-gradient(90deg,#4ad14a,#8fe03c 42%,#ffd93b 68%,#ff9a2e 86%,#f6413d);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.pk-fill::after{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,transparent 0 3px,rgba(0,0,0,.55) 3px 4px)}
+.lb-legend{display:flex;flex-wrap:wrap;margin-top:14px;font-size:10px;color:var(--flt2)}
+.lb-legend>span{padding:6px 11px;background:linear-gradient(180deg,#484848,#3f3f3f);border:1px solid #2a2a2a;
+  margin:0 -1px -1px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.06);text-shadow:0 -1px 0 rgba(0,0,0,.5);
+  display:flex;align-items:center;gap:6px}
+.lb-legend b{color:var(--flo2);font-weight:700}
+
+/* ═══ MODALS ═══ */
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:center;
+  justify-content:center;padding:24px}
+#ov.on{display:flex}
+#md{background:var(--chat);border-radius:5px;width:100%;max-width:600px;max-height:88vh;display:flex;
+  flex-direction:column;overflow:hidden;box-shadow:0 8px 16px rgba(0,0,0,.24)}
+#md-h{padding:16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+#md-t{font-size:20px;font-weight:700;flex:1;color:#fff}
+#md-x{background:none;border:none;color:var(--mut);cursor:pointer;font-size:22px}
+#md-b{overflow-y:auto;padding:0 16px 16px}
+#md-b::-webkit-scrollbar{width:8px}
+#md-b::-webkit-scrollbar-thumb{background:#1a1b1e;border-radius:4px}
+.ms{margin-bottom:24px}
+.ms-t{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--tx3);margin-bottom:10px}
+.mr{display:flex;gap:12px;padding:12px 14px;border-radius:4px;margin-bottom:6px;background:var(--embed);
+  border-left:4px solid var(--dim)}
+.mr.Overhaul{border-left-color:var(--ov)}.mr.Renovation{border-left-color:var(--rn)}
+.mr.Vanilla-Style{border-left-color:var(--vn)}.mr.Extension{border-left-color:var(--ex)}
+.mr.Remix{border-left-color:var(--rx)}
+.mr-n{font-size:16px;font-weight:600;margin-bottom:4px;color:#fff}
+.mr-d{font-size:14px;color:var(--tx3);line-height:1.5}
+.mr-e{font-size:12px;color:var(--fnt);margin-top:6px}
+.mbox{font-size:14px;color:var(--tx3);line-height:1.6;padding:14px 16px;background:var(--embed);
+  border-radius:4px;border-left:4px solid var(--bl)}
+.mbox b{color:#fff}
+.formula{background:var(--embed);border-left:4px solid #f6931e;border-radius:4px;padding:14px 16px;
+  font-size:14px;color:var(--tx3);line-height:1.9;margin-top:6px}
+.formula i{color:#ffb454;font-style:normal;font-weight:700}
+.formula b{color:#fff}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--grn);color:#fff;
+  font-size:14px;font-weight:600;padding:12px 20px;border-radius:4px;display:none;z-index:400;
+  box-shadow:0 8px 16px rgba(0,0,0,.24);max-width:90vw;text-align:center}
+#toast.err{background:var(--red)}
+
+/* ═══ MOBILE ═══ */
+#scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:55}
+#scrim.on{display:block}
+@media(max-width:900px){
+  .lb-c-ty,.lb-tycol{display:none}
+  .mg-h-by,.mg-by{display:none}
+  #mg-info{width:100%}
+}
+@media(max-width:820px){
+  html,body{font-size:15px}
+  #burger{display:flex}
+  #rail{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);
+    transition:transform .22s cubic-bezier(.2,.9,.3,1);width:64px;min-width:64px}
+  #side{position:fixed;left:64px;top:0;bottom:0;width:min(74vw,260px);min-width:0;z-index:56;
+    transform:translateX(-110%);transition:transform .22s cubic-bezier(.2,.9,.3,1)}
+  body.nav #rail{transform:none}
+  body.nav #side{transform:none}
+  #main{width:100%}
+  #crumb::before{font-size:20px}
+  #top{padding:0 10px;gap:6px}
+  .filters{padding:7px 10px;gap:5px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .f-lbl{display:none}
+  .song{padding:6px 10px;gap:11px}
+  .song-i{width:34px;height:34px;font-size:12px}
+  .song-r{flex-direction:column;align-items:flex-end;gap:3px;padding-top:4px}
+  .tally{min-width:0}
+  .dots{gap:2px}.dot{width:6px;height:6px}
+  #dt-head{padding:18px 14px 0}
+  #dt-name{font-size:23px}
+  #dt-body{padding:16px 14px 40px}
+  .ed{padding:12px 12px 12px 10px;gap:11px}
+  .rank{min-width:32px;height:32px;font-size:14px}
+  .ed-n{font-size:15px}
+  #sbar{padding:0 10px 14px}
+  #mg-top{padding:10px 12px;gap:10px}
+  #mg-crumb,#mg-tabs{padding-left:12px;padding-right:12px}
+  .mg-head{display:none}
+  .mgr{padding:0 12px;gap:11px}
+  .mg-cat{width:auto;max-width:120px}
+  .mg-src{width:auto;max-width:96px}
+  #lb-body{padding:0 6px 40px}
+  #lb-head{margin:8px 6px 0}
+  .lb-c-e,.lb-e{display:none}
+  .lb-c-p,.lb-p{width:96px}
+  .lb-c-t,.lb-t{width:32px;font-size:11px}
+  .lb-av{width:28px;height:28px;margin:0 6px}
+  .lb-pos{width:34px;font-size:12px}
+  .sr{padding:7px 10px}
+  #md,#syb{max-height:92vh}
+}
+@media(max-width:560px){
+  .lb-c-t:nth-of-type(n+5),.lb-t:nth-of-type(n+6){display:none}
+  #mg-av{display:none}
+  .mg-cat{display:none}
+  #dt-tabs{gap:4px}
+  .dtab{padding:8px 10px 10px;font-size:14px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="rail">
+    <div class="rl on" id="r-edits"><span>YE</span><span class="tip">Edits Tracker</span></div>
+    <div class="rl" id="r-comps"><span style="font-weight:800">M</span><span class="tip">Comps</span></div>
+    <div class="rl" id="r-board"><span>&#9650;</span><span class="tip">Leaderboard</span></div>
+    <div class="rl-sep"></div>
+    <div class="rl" id="r-guide"><span>?</span><span class="tip">Guide</span></div>
+    <a class="rl" id="r-tiktok" href="https://www.tiktok.com/@yeditsradio" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.6h-3.16v13.9c0 1.62-1.32 2.95-2.95 2.95a2.95 2.95 0 01-2.95-2.95 2.95 2.95 0 012.95-2.95c.28 0 .55.04.8.11V9.98a6.16 6.16 0 00-.8-.05A6.16 6.16 0 003.1 16.1a6.16 6.16 0 006.16 6.15 6.16 6.16 0 006.16-6.15V9.01a9.4 9.4 0 005.48 1.76V7.6a5.83 5.83 0 01-4.3-1.78z"/></svg>
+      <span class="tip">@yeditsradio on TikTok</span>
+    </a>
+  </div>
+
+  <div id="side">
+    <div id="shdr"><span id="brand">Yedits Tracker</span><span style="color:var(--tx2);font-size:11px">&#9662;</span></div>
+    <div id="fw"><input id="era-find" placeholder="Search eras" autocomplete="off" spellcheck="false"></div>
+    <div id="era-list"></div>
+  </div>
+
+  <div id="main">
+    <div id="top">
+      <button id="burger">&#9776;</button>
+      <div id="crumb"></div>
+      <div id="top-ct"></div>
+    </div>
+    <div class="sheetbar" id="sb-edits">
+      <span class="dot"></span><span class="msg">Live from Google Sheets</span>
+      <button class="rfr" data-refresh>Refresh</button>
+    </div>
+    <div class="filters" id="filters">
+      <span class="f-lbl">Type</span>
+      <span class="pill" data-t="Overhaul">Overhauls</span>
+      <span class="pill" data-t="Renovation">Renovations</span>
+      <span class="pill" data-t="Vanilla-Style">Vanilla-Style</span>
+      <span class="pill" data-t="Extension">Extensions</span>
+      <span class="pill" data-t="Remix">Remixes</span>
+      <span class="f-div"></span>
+      <span class="pill" data-f="hl">&#9733; Highlights</span>
+      <span class="pill" data-f="incomp">In a comp</span>
+      <span class="pill" data-f="nocomp">Not in a comp</span>
+      <span class="pill" data-f="single">Singles</span>
+      <span class="f-div"></span>
+      <span class="pill" data-f="released">Released</span>
+      <span class="pill" data-f="wip">WIP</span>
+      <span class="pill" data-f="cancelled">Cancelled</span>
+      <span class="pill" data-f="outdated">Outdated</span>
+      <span class="f-div"></span>
+      <span class="pill clear" id="clr-edits">Clear filters</span>
+    </div>
+    <div id="body"></div>
+    <div id="lb"></div>
+    <div id="mg"></div>
+    <div id="sbar">
+      <div id="sw">
+        <span class="si">&#8981;</span>
+        <input id="sq" placeholder="Search songs, edits, editors, comps&hellip;" autocomplete="off" spellcheck="false">
+        <kbd>/</kbd><button id="sx">&times;</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="scrim"></div>
+<div id="toast"></div>
+
+<div id="ov"><div id="md">
+  <div id="md-h"><div id="md-t">HOW THIS WORKS</div><button id="md-x">&times;</button></div>
+  <div id="md-b">
+    <div class="ms"><div class="ms-t">Structure</div>
+      <div class="mbox">Every song sits inside its era. Open a song for two tabs.<br><br>
+      <b>Ranked</b> &mdash; edits competing to be the best version. Ties are allowed: two edits can both be #1.<br>
+      <b>Special</b> &mdash; edits doing their own thing. Graded A&ndash;D, not ranked.</div></div>
+    <div class="ms"><div class="ms-t">Edit types</div>
+      <div class="mr Overhaul"><div><div class="mr-n">Overhaul</div><div class="mr-d">Full creative reimagining, driven by the editor's own vision but still rooted in the source.</div><div class="mr-e">e.g. Luwi &amp; Lilac &mdash; Over</div></div></div>
+      <div class="mr Renovation"><div><div class="mr-n">Renovation</div><div class="mr-d">Sweeping changes expanding the era's original vision, source still recognizable.</div><div class="mr-e">e.g. underdawg &mdash; On Sight</div></div></div>
+      <div class="mr Vanilla-Style"><div><div class="mr-n">Vanilla-Style</div><div class="mr-d">Faithful above all else &mdash; QoL edits and refinements, little outside direction.</div><div class="mr-e">e.g. SimpleJosh &mdash; Nobody To Love</div></div></div>
+      <div class="mr Extension"><div><div class="mr-n">Extension</div><div class="mr-d">Expands runtime using official or remix material, little custom production.</div><div class="mr-e">e.g. any Radical Redux edit</div></div></div>
+      <div class="mr Remix"><div><div class="mr-n">Remix</div><div class="mr-d">Reimagines the source through a different existing style rather than the editor's own.</div><div class="mr-e">e.g. club remixes, JPEG edits</div></div></div>
+    </div>
+    <div class="ms"><div class="ms-t">Scoring</div>
+      <div class="formula">
+        <b>Ranked</b> &mdash; #1 = <i>3</i> &nbsp; #2 = <i>2</i> &nbsp; #3 = <i>1</i> &nbsp; #4 = <i>0.5</i><br>
+        Past #4 becomes an <b>HM</b>, also <i>0.5</i>, unlimited per song<br>
+        &times; &radic;(filled slots &divide; 4), capped at 1<br><br>
+        <b>Special</b> &mdash; A = <i>3</i> &nbsp; B = <i>2</i> &nbsp; C = <i>1</i> &nbsp; D = <i>0.5</i><br>
+        <span style="color:var(--mut)">Grades aren't a ranking &mdash; several edits can share one.</span><br><br>
+        <b>Both</b> &mdash; &times; 1.25 if highlighted &#9733; &nbsp;&middot;&nbsp; &divide; &radic;(credited editors)<br><br>
+        <b>Comps board</b> uses the same maths on comps only. WIP and cancelled comps score nothing.
+      </div></div>
+    <div class="ms"><div class="ms-t">Note</div>
+      <div class="mbox">Type colour is descriptive, not a ranking. All data comes from the linked Google Sheet &mdash; edit the sheet and the site follows.</div></div>
+    <div class="ms"><div class="ms-t">Credits</div>
+      <div class="mbox" style="display:flex;align-items:center;gap:14px">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--bl);flex-shrink:0;
+          display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:15px">FG</div>
+        <div style="flex:1;min-width:0">
+          <div>Built and maintained by <b>fattygamer</b>, owner of <b>yeditsradio</b>.</div>
+          <a href="https://www.tiktok.com/@yeditsradio" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;color:#fff;
+             background:#010101;border:1px solid #2a2a2a;padding:6px 12px;border-radius:20px;
+             font-size:12.5px;font-weight:600;text-decoration:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.6h-3.16v13.9c0 1.62-1.32 2.95-2.95 2.95a2.95 2.95 0 01-2.95-2.95 2.95 2.95 0 012.95-2.95c.28 0 .55.04.8.11V9.98a6.16 6.16 0 00-.8-.05A6.16 6.16 0 003.1 16.1a6.16 6.16 0 006.16 6.15 6.16 6.16 0 006.16-6.15V9.01a9.4 9.4 0 005.48 1.76V7.6a5.83 5.83 0 01-4.3-1.78z"/></svg>
+            @yeditsradio on TikTok
+          </a>
+        </div>
+      </div></div>
+  </div>
+</div></div>
+<script id="D" type="application/json">
+{"eras":[{"name":"Before The College Dropout","color":"#f82f06","songs":[{"n":"Beat","s":"Album Tracks","d":[],"p":[]},{"n":"World Record Holders (Go Getters)","s":"Album Tracks","d":[],"p":[]},{"n":"Intro","s":"Album Tracks","d":[],"p":[]},{"n":"Nothin's Gonna Stop Me","s":"Album Tracks","d":[],"p":[]},{"n":"Go Getters - World Record Holders","s":"Album Tracks","d":[],"p":[]},{"n":"All I Need","s":"Album Tracks","d":[],"p":[]},{"n":"Rhymefest - 10 in a Benz","s":"Album Tracks","d":[],"p":[]},{"n":"Go Getters - Uh Oh!","s":"Album Tracks","d":[],"p":[]},{"n":"Go Getters - Mind Your Business","s":"Album Tracks","d":[],"p":[]},{"n":"Go Getters - Let Em In","s":"Album Tracks","d":[],"p":[]},{"n":"2001 Demo Tape / The Prerequisite","s":"Album Tracks","d":[],"p":[]},{"n":"Home (Windy)","s":"Album Tracks","d":[],"p":[]},{"n":"Jesus Walks","s":"Album Tracks","d":[],"p":[]},{"n":"Have It Your Way","s":"Album Tracks","d":[],"p":[]},{"n":"Out Of Your Mind","s":"Album Tracks","d":[],"p":[]},{"n":"Wow","s":"Album Tracks","d":[],"p":[]},{"n":"I Need To Know","s":"Album Tracks","d":[],"p":[]},{"n":"Gotta Pose","s":"Album Tracks","d":[],"p":[]},{"n":"Never Letting Go (The Stalker Song)","s":"Album Tracks","d":[],"p":[]},{"n":"Hey Mama","s":"Album Tracks","d":[],"p":[]},{"n":"Know The Game","s":"Album Tracks","d":[],"p":[]},{"n":"Family Business","s":"Album Tracks","d":[],"p":[]},{"n":"Dream Come True","s":"Album Tracks","d":[],"p":[]},{"n":"Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"Last Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"Heartbeat (Instrumental)","s":"Album Tracks","d":[],"p":[]},{"n":"Other Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"Motherfucker","s":"Album Tracks","d":[],"p":[]},{"n":"Payback","s":"Album Tracks","d":[],"p":[]},{"n":"You're My Type","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Carmen Reece - All That I Needed","s":"Album Tracks","d":[],"p":[]},{"n":"Lupe Fiasco - Birds & The Bees","s":"Album Tracks","d":[],"p":[]},{"n":"Miss Criss - Ghetto Se\u00f1orita","s":"Album Tracks","d":[],"p":[]},{"n":"Raw Stylus - Believe In Me","s":"Album Tracks","d":[],"p":[]},{"n":"Grav - Line For Line","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Ashnuckles - 1998 Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"Solar Tha Rightchus - What Am I To Do?","s":"Album Tracks","d":[],"p":[]},{"n":"Solar Tha Rightchus - Blow It Up","s":"Album Tracks","d":[],"p":[]},{"n":"Lil' Kim - Don't Mess with Me","s":"Album Tracks","d":[],"p":[]},{"n":"Jagged Edge - Let's Get Married (Reception","s":"Album Tracks","d":[],"p":[]},{"n":"Rhymefest - Good Ass Job","s":"Album Tracks","d":[],"p":[]},{"n":"JA\u0178-Z - Never Change","s":"Album Tracks","d":[],"p":[]},{"n":"Beanie Sigel & Freeway - Got Nowhere","s":"Album Tracks","d":[],"p":[]},{"n":"Scarface - Guess Who's Back","s":"Album Tracks","d":[],"p":[]}]},{"name":"The College Dropout","color":"#e22628","songs":[{"n":"Intro","s":"Album Tracks","d":[],"p":[]},{"n":"We Don't Care","s":"Album Tracks","d":[],"p":[]},{"n":"Graduation Day","s":"Album Tracks","d":[],"p":[]},{"n":"All Falls Down","s":"Album Tracks","d":[],"p":[]},{"n":"I'll Fly Away","s":"Album Tracks","d":[],"p":[]},{"n":"Spaceship","s":"Album Tracks","d":[],"p":[]},{"n":"Jesus Walks","s":"Album Tracks","d":[],"p":[]},{"n":"Never Let Me Down","s":"Album Tracks","d":[],"p":[]},{"n":"Get Em High","s":"Album Tracks","d":[],"p":[]},{"n":"Workout Plan","s":"Album Tracks","d":[],"p":[]},{"n":"The New Workout Plan","s":"Album Tracks","d":[],"p":[]},{"n":"Twista - Slow Jamz","s":"Album Tracks","d":[],"p":[]},{"n":"Breathe In Breathe Out","s":"Album Tracks","d":[],"p":[]},{"n":"School Spirit Skit","s":"Album Tracks","d":[],"p":[]},{"n":"School Spirit","s":"Album Tracks","d":[],"p":[]},{"n":"Lil Jimmy Skit","s":"Album Tracks","d":[],"p":[]},{"n":"Two Words","s":"Album Tracks","d":[],"p":[]},{"n":"Through The Wire","s":"Album Tracks","d":[],"p":[]},{"n":"Family Business","s":"Album Tracks","d":[],"p":[]},{"n":"Last Call","s":"Album Tracks","d":[],"p":[]},{"n":"Heavy Hitters","s":"Album Tracks","d":[],"p":[]},{"n":"It's Alright","s":"Album Tracks","d":[],"p":[]},{"n":"Dame Dash - Champions","s":"Album Tracks","d":[],"p":[]},{"n":"JA\u0178-Z - The Bounce","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - The Good, The Bad, The","s":"Album Tracks","d":[],"p":[]},{"n":"My Way","s":"Album Tracks","d":[],"p":[]},{"n":"Excuse Me Miss Again (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Talib Kweli - Get By (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Drop Dead Gorgeous","s":"Album Tracks","d":[],"p":[]},{"n":"Poppin\u2019 Tags (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Half Price","s":"Album Tracks","d":[],"p":[]},{"n":"\u201903 Electic Relaxation","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - Getting Out the Game","s":"Album Tracks","d":[],"p":[]},{"n":"GLC - GLC The Knockout King","s":"Album Tracks","d":[],"p":[]},{"n":"Freeway - Turn Out The Lights","s":"Album Tracks","d":[],"p":[]},{"n":"Girls, Girls, Girls (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Bonnie & Clyde Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"Olskool Ice-Gre - Brigade Level Formation","s":"Album Tracks","d":[],"p":[]},{"n":"Get By (Re-Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Better Than Yours","s":"Album Tracks","d":[],"p":[]},{"n":"Knock Knock (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Malik Yusef - Wouldn't You Like To...","s":"Album Tracks","d":[],"p":[]},{"n":"Britney Spears - Me Against The Music","s":"Album Tracks","d":[],"p":[]},{"n":"No More For Me","s":"Album Tracks","d":[],"p":[]},{"n":"Keep the Receipt","s":"Album Tracks","d":[],"p":[]},{"n":"Stand Up (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - Turn Yaself In","s":"Album Tracks","d":[],"p":[]},{"n":"\u201903 Til Infinity","s":"Album Tracks","d":[],"p":[]},{"n":"Through The Wire (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Kamilah Summer - You","s":"Album Tracks","d":[],"p":[]},{"n":"18 Years","s":"Leaks","d":[],"p":[]},{"n":"Can't Nobody","s":"Leaks","d":[],"p":[]},{"n":"Change Clothes Freestyle","s":"Leaks","d":[],"p":[]},{"n":"Dreamkillers","s":"Leaks","d":[],"p":[]},{"n":"Gimme The Mic","s":"Leaks","d":[],"p":[]},{"n":"Improvize","s":"Leaks","d":[],"p":[]},{"n":"I See Now","s":"Leaks","d":[],"p":[]},{"n":"Last Row - - - -","s":"Leaks","d":[],"p":[]},{"n":"Living A Movie Pt. 1 100 - -","s":"Leaks","d":[],"p":[]},{"n":"Living A Movie Pt. 2 90.5 - -","s":"Leaks","d":[],"p":[]},{"n":"The Roc In Here","s":"Leaks","d":[],"p":[]},{"n":"The Truth (Freestyle)","s":"Leaks","d":[],"p":[]},{"n":"Together They're Tens","s":"Leaks","d":[],"p":[]},{"n":"Whole Life","s":"Leaks","d":[],"p":[]},{"n":"Features","s":"Leaks","d":[],"p":[]},{"n":"Consequence - Wack Niggas","s":"Leaks","d":[],"p":[]},{"n":"Malik Yusef - Magic Man","s":"Leaks","d":[],"p":[]},{"n":"White Boy - U Know","s":"Leaks","d":[],"p":[]}]},{"name":"Late Registration","color":"#eb2613","songs":[{"n":"Wake Up Mr. West","s":"Album Tracks","d":[],"p":[]},{"n":"Heard 'Em Say","s":"Album Tracks","d":[],"p":[]},{"n":"Touch The Sky","s":"Album Tracks","d":[],"p":[]},{"n":"Gold Digger","s":"Album Tracks","d":[],"p":[]},{"n":"Drive Slow","s":"Album Tracks","d":[],"p":[]},{"n":"My Way Home","s":"Album Tracks","d":[],"p":[]},{"n":"Crack Music","s":"Album Tracks","d":[],"p":[]},{"n":"Roses","s":"Album Tracks","d":[],"p":[]},{"n":"Bring Me Down","s":"Album Tracks","d":[],"p":[]},{"n":"Addiction","s":"Album Tracks","d":[],"p":[]},{"n":"Diamonds From Sierra Leone (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"We Major","s":"Album Tracks","d":[],"p":[]},{"n":"Hey Mama","s":"Album Tracks","d":[],"p":[]},{"n":"Celebration","s":"Album Tracks","d":[],"p":[]},{"n":"Gone","s":"Album Tracks","d":[],"p":[]},{"n":"Diamonds From Sierra Leone","s":"Album Tracks","d":[],"p":[]},{"n":"Late","s":"Album Tracks","d":[],"p":[]},{"n":"Back To Basics","s":"Album Tracks","d":[],"p":[]},{"n":"We Can Make It Better","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks / Singles","s":"Album Tracks","d":[],"p":[]},{"n":"Freestyle Jam -- B Major","s":"Album Tracks","d":[],"p":[]},{"n":"Ghetto Love","s":"Album Tracks","d":[],"p":[]},{"n":"Last Row","s":"Album Tracks","d":[],"p":[]},{"n":"Bump J - Pusha Man","s":"Album Tracks","d":[],"p":[]},{"n":"Jennifer Lopez - Get Right","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Brandy - Talk About Our Love","s":"Album Tracks","d":[],"p":[]},{"n":"Dilated Peoples - This Way","s":"Album Tracks","d":[],"p":[]},{"n":"Janet - My Baby","s":"Album Tracks","d":[],"p":[]},{"n":"Melbeatz - Oh Oh","s":"Album Tracks","d":[],"p":[]},{"n":"Dwele - Hold On (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Jadakiss - Gettin' It In","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - So Soulful","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - Wack Niggas","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - 03' Til Infinity","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - I See Now","s":"Album Tracks","d":[],"p":[]},{"n":"Slum Village - Selfish","s":"Album Tracks","d":[],"p":[]},{"n":"Cassius Henry - The One (Sniper Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"The Game - Whole City Behind Us","s":"Album Tracks","d":[],"p":[]},{"n":"Jin - I Got a Love","s":"Album Tracks","d":[],"p":[]},{"n":"USHER - Confessions Part II Remix","s":"Album Tracks","d":[],"p":[]},{"n":"Cam'ron - Down And Out","s":"Album Tracks","d":[],"p":[]},{"n":"John Legend - Number One","s":"Album Tracks","d":[],"p":[]},{"n":"Teairra Mar\u00ed - Make Her Feel Good (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Do Or Die - Higher","s":"Album Tracks","d":[],"p":[]},{"n":"Do or Die - Paid the Price","s":"Album Tracks","d":[],"p":[]},{"n":"Chamillionaire - Call Some Hoes","s":"Album Tracks","d":[],"p":[]},{"n":"Common - The Corner","s":"Album Tracks","d":[],"p":[]},{"n":"Common - GO!","s":"Album Tracks","d":[],"p":[]},{"n":"Common - Chi-City","s":"Album Tracks","d":[],"p":[]},{"n":"Common - The Food (Live)","s":"Album Tracks","d":[],"p":[]},{"n":"Common - They Say","s":"Album Tracks","d":[],"p":[]},{"n":"Young Gunz - Grown Man Pt.","s":"Album Tracks","d":[],"p":[]}]},{"name":"Graduation","color":"#a05ed0","songs":[{"n":"Good Morning","s":"Album Tracks","d":[],"p":[]},{"n":"Champion","s":"Album Tracks","d":[],"p":[]},{"n":"Stronger","s":"Album Tracks","d":[],"p":[]},{"n":"I Wonder","s":"Album Tracks","d":[],"p":[]},{"n":"Good Life","s":"Album Tracks","d":[],"p":[]},{"n":"Can't Tell Me Nothing","s":"Album Tracks","d":[],"p":[]},{"n":"Barry Bonds","s":"Album Tracks","d":[],"p":[]},{"n":"Drunk And Hot Girls","s":"Album Tracks","d":[],"p":[]},{"n":"Flashing Lights","s":"Album Tracks","d":[],"p":[]},{"n":"Everything I Am","s":"Album Tracks","d":[],"p":[]},{"n":"The Glory","s":"Album Tracks","d":[],"p":[]},{"n":"Homecoming","s":"Album Tracks","d":[],"p":[]},{"n":"Big Brother","s":"Album Tracks","d":[],"p":[]},{"n":"Bittersweet Poetry","s":"Album Tracks","d":[],"p":[]},{"n":"Good Night","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks / Singles","s":"Album Tracks","d":[],"p":[]},{"n":"Impossible","s":"Album Tracks","d":[],"p":[]},{"n":"Classic (Better Than I've Ever Been)","s":"Album Tracks","d":[],"p":[]},{"n":"Everything (The Diddy Song)","s":"Album Tracks","d":[],"p":[]},{"n":"A Million And One","s":"Album Tracks","d":[],"p":[]},{"n":"Building","s":"Album Tracks","d":[],"p":[]},{"n":"Love Me","s":"Album Tracks","d":[],"p":[]},{"n":"Piano","s":"Album Tracks","d":[],"p":[]},{"n":"Common - Touch It","s":"Album Tracks","d":[],"p":[]},{"n":"Fakes :(","s":"Album Tracks","d":[],"p":[]},{"n":"Thank God","s":"Album Tracks","d":[],"p":[]},{"n":"To Me","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Clue? - Like This","s":"Album Tracks","d":[],"p":[]},{"n":"Patti LaBelle - Anything","s":"Album Tracks","d":[],"p":[]},{"n":"The Game - Wouldn't Get Far","s":"Album Tracks","d":[],"p":[]},{"n":"Bump J - Top This","s":"Album Tracks","d":[],"p":[]},{"n":"E-40 - Tell Me When To Go (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Rhymefest - More","s":"Album Tracks","d":[],"p":[]},{"n":"Rhymefest - Brand New","s":"Album Tracks","d":[],"p":[]},{"n":"Miri Ben-Ari - Fly Away","s":"Album Tracks","d":[],"p":[]},{"n":"Rhymefest - Chi-Town","s":"Album Tracks","d":[],"p":[]},{"n":"Mashonda - Hold Me","s":"Album Tracks","d":[],"p":[]},{"n":"Smitty - Ghetto","s":"Album Tracks","d":[],"p":[]},{"n":"Three 6 Mafia - Side 2 Side (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Fall Out Boy - This Ain't a Scene, It's an Arms","s":"Album Tracks","d":[],"p":[]},{"n":"Ghostface Killah - Back Like That (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Nas - Still Dreaming","s":"Album Tracks","d":[],"p":[]},{"n":"Jamie Foxx - Extravaganza","s":"Album Tracks","d":[],"p":[]},{"n":"N.O.R.E. - I'ma Get You","s":"Album Tracks","d":[],"p":[]},{"n":"Pharrell Williams - Number One","s":"Album Tracks","d":[],"p":[]},{"n":"Teriyaki Boyz - I Still Love H.E.R.","s":"Album Tracks","d":[],"p":[]},{"n":"Consquence - Grammy Family","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Absolut - If I Shoot You (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - Don't Forget 'Em (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Child Rebel Soldier - Us Placers","s":"Album Tracks","d":[],"p":[]},{"n":"Common - Southside","s":"Album Tracks","d":[],"p":[]},{"n":"Porno (Interlude)","s":"Album Tracks","d":[],"p":[]},{"n":"88-Keys - Stay Up! (Viagra)","s":"Album Tracks","d":[],"p":[]},{"n":"Talib Kweli - In the Mood","s":"Album Tracks","d":[],"p":[]},{"n":"Kid Sister - Pro Nails","s":"Album Tracks","d":[],"p":[]},{"n":"Young Folks","s":"Album Tracks","d":[],"p":[]},{"n":"Interviews (Interlude)","s":"Album Tracks","d":[],"p":[]},{"n":"Ne-Yo - Because of You (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"T-Pain - Buy U A Drank (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Throw Some D's (Remix)","s":"Album Tracks","d":[],"p":[]}]},{"name":"808s & Heartbreak","color":"#9caeac","songs":[{"n":"Say You Will","s":"Album Tracks","d":[],"p":[]},{"n":"Welcome To Heartbreak","s":"Album Tracks","d":[],"p":[]},{"n":"Heartless","s":"Album Tracks","d":[],"p":[]},{"n":"Amazing","s":"Album Tracks","d":[],"p":[]},{"n":"Love Lockdown","s":"Album Tracks","d":[],"p":[]},{"n":"Paranoid","s":"Album Tracks","d":[],"p":[]},{"n":"RoboCop","s":"Album Tracks","d":[],"p":[]},{"n":"Street Lights","s":"Album Tracks","d":[],"p":[]},{"n":"Bad News","s":"Album Tracks","d":[],"p":[]},{"n":"See You In My Nightmares","s":"Album Tracks","d":[],"p":[]},{"n":"Coldest Winter","s":"Album Tracks","d":[],"p":[]},{"n":"Pinocchio Story (Freestyle Live from","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"Smoked Up","s":"Album Tracks","d":[],"p":[]},{"n":"Hot Sauce","s":"Album Tracks","d":[],"p":[]},{"n":"Takin' Off","s":"Album Tracks","d":[],"p":[]},{"n":"Madonna - Live To Tell (Kanye West Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Cassidy - My Drink N' My 2 Step (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Chris Brown - Down","s":"Album Tracks","d":[],"p":[]},{"n":"JA\u0178-Z - Roc Boys (And The Winner Is)...","s":"Album Tracks","d":[],"p":[]},{"n":"Fonzworth Bentley - Everybody","s":"Album Tracks","d":[],"p":[]},{"n":"Beyonc\u00e9 - Ego (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Estelle - American Boy","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Felli Fel - Finer Things","s":"Album Tracks","d":[],"p":[]},{"n":"Madonna - Beat Goes On","s":"Album Tracks","d":[],"p":[]},{"n":"Young Jeezy - Put On","s":"Album Tracks","d":[],"p":[]},{"n":"Lil Wayne - Lollipop (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Khaled - Go Hard","s":"Album Tracks","d":[],"p":[]},{"n":"Malik Yusef - Promised Land","s":"Album Tracks","d":[],"p":[]},{"n":"T.I. & JA\u0178-Z - Swagga Like Us","s":"Album Tracks","d":[],"p":[]},{"n":"John Legend - It's Over","s":"Album Tracks","d":[],"p":[]},{"n":"T-Pain - Therapy","s":"Album Tracks","d":[],"p":[]},{"n":"Sophia Fresh - What It Is","s":"Album Tracks","d":[],"p":[]}]},{"name":"Good Ass Job","color":"#9d06f8","songs":[{"n":"No Turnin' Back","s":"Album Tracks","d":[],"p":[]},{"n":"Hate It","s":"Album Tracks","d":[],"p":[]},{"n":"Hood Bitch","s":"Album Tracks","d":[],"p":[]},{"n":"I'll Be Alright","s":"Album Tracks","d":[],"p":[]},{"n":"Room To Breathe","s":"Album Tracks","d":[],"p":[]},{"n":"SingSing","s":"Album Tracks","d":[],"p":[]},{"n":"That's My Bitch [V5-V6]","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]},{"n":"Christina Milian - Diamonds","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - We Like To Party","s":"Album Tracks","d":[],"p":[]},{"n":"JA\u0178-Z - She's Like That All The Time","s":"Album Tracks","d":[],"p":[]},{"n":"Post-VMAs","s":"Album Tracks","d":[],"p":[]},{"n":"Crazy Life","s":"Album Tracks","d":[],"p":[]},{"n":"Down Town","s":"Album Tracks","d":[],"p":[]},{"n":"Eyes Closed","s":"Album Tracks","d":[],"p":[]},{"n":"Flashing Lights","s":"Album Tracks","d":[],"p":[]},{"n":"Hard Horn Nightmare","s":"Album Tracks","d":[],"p":[]},{"n":"Heartbreaker","s":"Album Tracks","d":[],"p":[]},{"n":"Higher [V1]","s":"Album Tracks","d":[],"p":[]},{"n":"Just Kill Me Please","s":"Album Tracks","d":[],"p":[]},{"n":"No Parties In LA","s":"Album Tracks","d":[],"p":[]},{"n":"See Me Again","s":"Album Tracks","d":[],"p":[]},{"n":"Shoot Up The Station","s":"Album Tracks","d":[],"p":[]},{"n":"Throw Money Everywhere","s":"Album Tracks","d":[],"p":[]},{"n":"Only For The Night","s":"Album Tracks","d":[],"p":[]},{"n":"Instrumental Copy","s":"Album Tracks","d":[],"p":[]},{"n":"Armed And Dangerous","s":"Album Tracks","d":[],"p":[]},{"n":"Choir Sample","s":"Album Tracks","d":[],"p":[]},{"n":"Dance At Night","s":"Album Tracks","d":[],"p":[]},{"n":"Give It All Away","s":"Album Tracks","d":[],"p":[]},{"n":"Higher","s":"Album Tracks","d":[],"p":[]},{"n":"Hornz","s":"Album Tracks","d":[],"p":[]},{"n":"HypeMeUp","s":"Album Tracks","d":[],"p":[]},{"n":"Lonely","s":"Album Tracks","d":[],"p":[]},{"n":"Make That Money","s":"Album Tracks","d":[],"p":[]},{"n":"Name Ring","s":"Album Tracks","d":[],"p":[]},{"n":"Ohh","s":"Album Tracks","d":[],"p":[]},{"n":"Ain't No Tellin","s":"Album Tracks","d":[],"p":[]},{"n":"String Pad","s":"Album Tracks","d":[],"p":[]},{"n":"Tellin U Before","s":"Album Tracks","d":[],"p":[]},{"n":"First World Problematic (with Child Rebel Soldier)","s":"Album Tracks","d":[],"p":[]},{"n":"Diamonds and Dollars","s":"Album Tracks","d":[],"p":[]},{"n":"The National Anthem","s":"Album Tracks","d":[],"p":[]},{"n":"Shrink","s":"Album Tracks","d":[],"p":[]},{"n":"N.E.R.D - Everybody Nose (All The Girls","s":"Album Tracks","d":[],"p":[]},{"n":"Misc Instrumentals","s":"Album Tracks","d":[],"p":[]},{"n":"BMV9","s":"Album Tracks","d":[],"p":[]},{"n":"Love You","s":"Album Tracks","d":[],"p":[]},{"n":"Popular","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"GLC - Big Screen","s":"Album Tracks","d":[],"p":[]},{"n":"Q-Tip - We Fight / We Love (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Common - Punch Drunk Love","s":"Album Tracks","d":[],"p":[]},{"n":"Jamie Foxx - Digital Girl","s":"Album Tracks","d":[],"p":[]},{"n":"Teriyaki Boyz - Teriya-King","s":"Album Tracks","d":[],"p":[]},{"n":"N.A.S.A. - Gifted","s":"Album Tracks","d":[],"p":[]},{"n":"The-Dream - Walkin' on the Moon","s":"Album Tracks","d":[],"p":[]},{"n":"Keri Hilson - Knock You Down","s":"Album Tracks","d":[],"p":[]},{"n":"Kid Cudi - Make Her Say","s":"Album Tracks","d":[],"p":[]},{"n":"Rick Ross - Maybach Music II","s":"Album Tracks","d":[],"p":[]},{"n":"The Scratch - Ready To Go","s":"Album Tracks","d":[],"p":[]},{"n":"Clipse - Kinda Like a Big Deal","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Hotday - Flute Flow Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"T.I. - On Top of the World","s":"Album Tracks","d":[],"p":[]},{"n":"Mr Hudson - Supernova","s":"Album Tracks","d":[],"p":[]},{"n":"Twista - Alright","s":"Album Tracks","d":[],"p":[]},{"n":"JA\u0178-Z - Run This Town","s":"Album Tracks","d":[],"p":[]},{"n":"Really Doe - Plastic","s":"Album Tracks","d":[],"p":[]},{"n":"Trick Daddy - I Can't Say No","s":"Album Tracks","d":[],"p":[]},{"n":"Drake - Forever","s":"Album Tracks","d":[],"p":[]},{"n":"Mr Hudson - Anyone But Him","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - Whatever U Want","s":"Album Tracks","d":[],"p":[]},{"n":"MF Doom - Gazzillion Ear (Madvillainz","s":"Album Tracks","d":[],"p":[]},{"n":"Drake - Find Your Love","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Class & DJ Young - I'm The Ish (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"The WRLDFMS Tony Williams - Another You","s":"Album Tracks","d":[],"p":[]}]},{"name":"My Beautiful Dark Twisted Fantasy","color":"#ed1132","songs":[{"n":"Dark Fantasy","s":"Album Tracks","d":[],"p":[]},{"n":"Gorgeous","s":"Album Tracks","d":[],"p":[]},{"n":"POWER","s":"Album Tracks","d":[],"p":[]},{"n":"All Of The Lights","s":"Album Tracks","d":[],"p":[]},{"n":"Monster","s":"Album Tracks","d":[],"p":[]},{"n":"So Appalled","s":"Album Tracks","d":[],"p":[]},{"n":"Devil In A New Dress","s":"Album Tracks","d":[],"p":[]},{"n":"Runaway","s":"Album Tracks","d":[],"p":[]},{"n":"Hell Of A Life","s":"Album Tracks","d":[],"p":[]},{"n":"Blame Game","s":"Album Tracks","d":[],"p":[]},{"n":"Lost In The World","s":"Album Tracks","d":[],"p":[]},{"n":"iTunes Exclusive","s":"Album Tracks","d":[],"p":[]},{"n":"See Me Now","s":"Album Tracks","d":[],"p":[]},{"n":"Planned Deluxe Tracks","s":"Album Tracks","d":[],"p":[]},{"n":"Chain Heavy","s":"Album Tracks","d":[],"p":[]},{"n":"Mama's Boyfriend","s":"Album Tracks","d":[],"p":[]},{"n":"POWER (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Pure","s":"Album Tracks","d":[],"p":[]},{"n":"Runaway Love (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Good Friday","s":"Album Tracks","d":[],"p":[]},{"n":"Lord Lord Lord","s":"Album Tracks","d":[],"p":[]},{"n":"Christian Dior Denim Flow","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Stop!","s":"Album Tracks","d":[],"p":[]},{"n":"Take One For The Team","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Look Down","s":"Album Tracks","d":[],"p":[]},{"n":"Looking For Trouble","s":"Album Tracks","d":[],"p":[]},{"n":"Christmas In Harlem","s":"Album Tracks","d":[],"p":[]},{"n":"Mama's Boy","s":"Leaks","d":[],"p":[]},{"n":"Sweat On My Face","s":"Leaks","d":[],"p":[]},{"n":"Holding Me Back","s":"Leaks","d":[],"p":[]},{"n":"JJ Beat","s":"Leaks","d":[],"p":[]},{"n":"Kid Cudi - Wild'n Cuz I'm Young","s":"Leaks","d":[],"p":[]},{"n":"Features","s":"Leaks","d":[],"p":[]},{"n":"Rick Ross - Live Fast, Die Young","s":"Leaks","d":[],"p":[]},{"n":"Stromae - Alors On Danse (Remix)","s":"Leaks","d":[],"p":[]},{"n":"Katy Perry - E.T.","s":"Leaks","d":[],"p":[]},{"n":"Kid Cudi - Erase Me","s":"Leaks","d":[],"p":[]},{"n":"Big Sean - Glenwood","s":"Leaks","d":[],"p":[]},{"n":"Chris Brown - Deuces Remix","s":"Leaks","d":[],"p":[]},{"n":"GLC - Flight School","s":"Leaks","d":[],"p":[]},{"n":"JYJ - Ayyy Girl","s":"Leaks","d":[],"p":[]},{"n":"Thirty Seconds to Mars - Hurricane","s":"Leaks","d":[],"p":[]},{"n":"La Roux - In for the Kill","s":"Leaks","d":[],"p":[]},{"n":"Nicki Minaj - Blazin'","s":"Leaks","d":[],"p":[]},{"n":"Be-Cleve In Yourself","s":"Leaks","d":[],"p":[]},{"n":"Nachos 95.9 - -","s":"Leaks","d":[],"p":[]},{"n":"Ta-ra-ra Ay!","s":"Leaks","d":[],"p":[]},{"n":"Trend Starters","s":"Leaks","d":[],"p":[]},{"n":"Kenny West vs. Cleveland Brown Jr. Rap","s":"Leaks","d":[],"p":[]}]},{"name":"Watch The Throne","color":"#c58739","songs":[{"n":"No Church In The Wild","s":"Album Tracks","d":[],"p":[]},{"n":"Lift Off","s":"Album Tracks","d":[],"p":[]},{"n":"Ni**as In Paris","s":"Album Tracks","d":[],"p":[]},{"n":"Otis","s":"Album Tracks","d":[],"p":[]},{"n":"Gotta Have It","s":"Album Tracks","d":[],"p":[]},{"n":"New Day","s":"Album Tracks","d":[],"p":[]},{"n":"That's My Bitch","s":"Album Tracks","d":[],"p":[]},{"n":"Welcome To The Jungle","s":"Album Tracks","d":[],"p":[]},{"n":"Who Gon Stop Me","s":"Album Tracks","d":[],"p":[]},{"n":"Murder To Excellence","s":"Album Tracks","d":[],"p":[]},{"n":"Made In America","s":"Album Tracks","d":[],"p":[]},{"n":"Why I Love You","s":"Album Tracks","d":[],"p":[]},{"n":"Deluxe Tracklist","s":"Album Tracks","d":[],"p":[]},{"n":"Illest Motherf**ker Alive","s":"Album Tracks","d":[],"p":[]},{"n":"H\u2022A\u2022M","s":"Album Tracks","d":[],"p":[]},{"n":"Primetime","s":"Album Tracks","d":[],"p":[]},{"n":"The Joy","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"All The Time","s":"Album Tracks","d":[],"p":[]},{"n":"Awesome","s":"Album Tracks","d":[],"p":[]},{"n":"Ever, Ever","s":"Album Tracks","d":[],"p":[]},{"n":"Interlude 86.1 - -","s":"Album Tracks","d":[],"p":[]},{"n":"We Are Young 116 /","s":"Album Tracks","d":[],"p":[]},{"n":"Ni**as In Paris (Reprise)","s":"Album Tracks","d":[],"p":[]},{"n":"Living So Italian","s":"Album Tracks","d":[],"p":[]},{"n":"Mannequin","s":"Album Tracks","d":[],"p":[]},{"n":"Whole Lifetime","s":"Album Tracks","d":[],"p":[]},{"n":"Not The Same","s":"Album Tracks","d":[],"p":[]},{"n":"Runnin Through My Dreams","s":"Album Tracks","d":[],"p":[]},{"n":"Break This Down","s":"Album Tracks","d":[],"p":[]},{"n":"Sky","s":"Album Tracks","d":[],"p":[]},{"n":"John Legend - Flashlights","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Aaron Camper - Sing a Song","s":"Album Tracks","d":[],"p":[]},{"n":"T.I. - Welcome to the World","s":"Album Tracks","d":[],"p":[]},{"n":"Keri Hilson - Pretty Girl Rock (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Do or Die - You Know","s":"Album Tracks","d":[],"p":[]},{"n":"JoiStaRR - Same Time","s":"Album Tracks","d":[],"p":[]},{"n":"Big Sean - Marvin & Chardonnay","s":"Album Tracks","d":[],"p":[]},{"n":"Unrecorded Beats","s":"Album Tracks","d":[],"p":[]},{"n":"Diplo Mike 2","s":"Album Tracks","d":[],"p":[]},{"n":"Altitude","s":"Album Tracks","d":[],"p":[]},{"n":"Go Easy On Me","s":"Album Tracks","d":[],"p":[]},{"n":"Guilded Sprinters","s":"Album Tracks","d":[],"p":[]},{"n":"Milly Stadium","s":"Album Tracks","d":[],"p":[]},{"n":"Old Soul","s":"Album Tracks","d":[],"p":[]},{"n":"Start Over","s":"Album Tracks","d":[],"p":[]},{"n":"Huge","s":"Album Tracks","d":[],"p":[]},{"n":"R&B","s":"Album Tracks","d":[],"p":[]},{"n":"Hit-Boys1582","s":"Album Tracks","d":[],"p":[]},{"n":"Hit-Boys1499","s":"Album Tracks","d":[],"p":[]},{"n":"Hit-Boys1566","s":"Album Tracks","d":[],"p":[]},{"n":"Hit-Boys1675","s":"Album Tracks","d":[],"p":[]},{"n":"Hit-Boys1388","s":"Album Tracks","d":[],"p":[]},{"n":"Hit-Boys1613","s":"Album Tracks","d":[],"p":[]}]},{"name":"Cruel Summer","color":"#917878","songs":[{"n":"To The World","s":"Album Tracks","d":[],"p":[]},{"n":"Clique","s":"Album Tracks","d":[],"p":[]},{"n":"Mercy","s":"Album Tracks","d":[],"p":[]},{"n":"New God Flow","s":"Album Tracks","d":[],"p":[]},{"n":"The Morning","s":"Album Tracks","d":[],"p":[]},{"n":"Cold","s":"Album Tracks","d":[],"p":[]},{"n":"Higher","s":"Album Tracks","d":[],"p":[]},{"n":"Sin City","s":"Album Tracks","d":[],"p":[]},{"n":"The One","s":"Album Tracks","d":[],"p":[]},{"n":"Creepers","s":"Album Tracks","d":[],"p":[]},{"n":"Bliss","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Like","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"No More","s":"Album Tracks","d":[],"p":[]},{"n":"One Night Star","s":"Album Tracks","d":[],"p":[]},{"n":"John Legend - On Fire","s":"Album Tracks","d":[],"p":[]},{"n":"Enjoy The Pain","s":"Album Tracks","d":[],"p":[]},{"n":"Hear Me Now","s":"Album Tracks","d":[],"p":[]},{"n":"KanyeIdea","s":"Album Tracks","d":[],"p":[]},{"n":"I Know You Missed It","s":"Album Tracks","d":[],"p":[]},{"n":"Get Comfortable","s":"Album Tracks","d":[],"p":[]},{"n":"Espresso","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Beyonc\u00e9 - Party (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"RZA - White Dress","s":"Album Tracks","d":[],"p":[]},{"n":"Swizz Beatz - Skyscrapers","s":"Album Tracks","d":[],"p":[]},{"n":"Starshell - Superluva (Remix)","s":"Album Tracks","d":[],"p":[]}]},{"name":"Yeezus","color":"#ae9c9c","songs":[{"n":"On Sight 109 /","s":"Album Tracks","d":[],"p":[]},{"n":"Black Skinhead","s":"Album Tracks","d":[],"p":[]},{"n":"I Am A God","s":"Album Tracks","d":[],"p":[]},{"n":"New Slaves G Phrygian /","s":"Album Tracks","d":[],"p":[]},{"n":"Hold My Liquor","s":"Album Tracks","d":[],"p":[]},{"n":"I'm In It","s":"Album Tracks","d":[],"p":[]},{"n":"Blood On The Leaves","s":"Album Tracks","d":[],"p":[]},{"n":"Guilt Trip","s":"Album Tracks","d":[],"p":[]},{"n":"Send It Up","s":"Album Tracks","d":[],"p":[]},{"n":"Bound","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"Awesome","s":"Album Tracks","d":[],"p":[]},{"n":"Can't Get Over Me","s":"Album Tracks","d":[],"p":[]},{"n":"Emotions","s":"Album Tracks","d":[],"p":[]},{"n":"Get Too High","s":"Album Tracks","d":[],"p":[]},{"n":"Good Things Dont Last","s":"Album Tracks","d":[],"p":[]},{"n":"Greek Medusa","s":"Album Tracks","d":[],"p":[]},{"n":"Guilt Trip (OG)","s":"Album Tracks","d":[],"p":[]},{"n":"HollyWood Be Thy Name","s":"Album Tracks","d":[],"p":[]},{"n":"I Am Not Home","s":"Album Tracks","d":[],"p":[]},{"n":"I Only Have Eyes","s":"Album Tracks","d":[],"p":[]},{"n":"Imitation Of Christ","s":"Album Tracks","d":[],"p":[]},{"n":"Leafy","s":"Album Tracks","d":[],"p":[]},{"n":"Lost Bicycle","s":"Album Tracks","d":[],"p":[]},{"n":"Nobody To Love","s":"Album Tracks","d":[],"p":[]},{"n":"No More Games","s":"Album Tracks","d":[],"p":[]},{"n":"No No No No","s":"Album Tracks","d":[],"p":[]},{"n":"One I Love","s":"Album Tracks","d":[],"p":[]},{"n":"Pain","s":"Album Tracks","d":[],"p":[]},{"n":"Padded Walls","s":"Album Tracks","d":[],"p":[]},{"n":"Why Does Summer Have To End","s":"Album Tracks","d":[],"p":[]},{"n":"Why Feel Bad","s":"Album Tracks","d":[],"p":[]},{"n":"WOW!","s":"Album Tracks","d":[],"p":[]},{"n":"John Legend - Shy Can't Look","s":"Album Tracks","d":[],"p":[]},{"n":"Pusha T - Pain","s":"Album Tracks","d":[],"p":[]},{"n":"Instrumentals","s":"Album Tracks","d":[],"p":[]},{"n":"Ain't Nobody Bulletproof 80 - -","s":"Album Tracks","d":[],"p":[]},{"n":"He's A Rebel","s":"Album Tracks","d":[],"p":[]},{"n":"Maria","s":"Album Tracks","d":[],"p":[]},{"n":"Turn Me Down","s":"Album Tracks","d":[],"p":[]},{"n":"Work It","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Pusha T - Amen","s":"Album Tracks","d":[],"p":[]},{"n":"Nick Cannon - Big Spender","s":"Album Tracks","d":[],"p":[]},{"n":"The WRLDFMS Tony Williams - Another You","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Khaled - I Wish You Would","s":"Album Tracks","d":[],"p":[]},{"n":"C Minor/D","s":"Album Tracks","d":[],"p":[]},{"n":"The Game - Jesus Piece","s":"Album Tracks","d":[],"p":[]},{"n":"The Game - Rollin","s":"Album Tracks","d":[],"p":[]},{"n":"Rihanna - Diamonds (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"The Madd Rapper - Can't Stop My Love","s":"Album Tracks","d":[],"p":[]}]},{"name":"Cruel Winter [V1]","color":"#8c7272","songs":[{"n":"All The Time","s":"Album Tracks","d":[],"p":[]},{"n":"Can't Look In My Eyes","s":"Album Tracks","d":[],"p":[]},{"n":"Come Back To Me","s":"Album Tracks","d":[],"p":[]},{"n":"Cruel Winter","s":"Album Tracks","d":[],"p":[]},{"n":"Enjoy The Pain","s":"Album Tracks","d":[],"p":[]},{"n":"Heart Is So Cold","s":"Album Tracks","d":[],"p":[]},{"n":"Higher","s":"Album Tracks","d":[],"p":[]}]},{"name":"Yeezus 2","color":"#8d8271","songs":[{"n":"About Time","s":"Album Tracks","d":[],"p":[]},{"n":"Back Up Off The Ledge","s":"Album Tracks","d":[],"p":[]},{"n":"After You","s":"Album Tracks","d":[],"p":[]},{"n":"Hummer","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Want To Think","s":"Album Tracks","d":[],"p":[]},{"n":"Fall Into You","s":"Album Tracks","d":[],"p":[]},{"n":"Father Stretch My Hands","s":"Album Tracks","d":[],"p":[]},{"n":"Gut Feeling","s":"Album Tracks","d":[],"p":[]},{"n":"Hit-Boy Idea","s":"Album Tracks","d":[],"p":[]},{"n":"I Could Tell -- Ab Minor","s":"Album Tracks","d":[],"p":[]},{"n":"Live Together","s":"Album Tracks","d":[],"p":[]},{"n":"Losing Me","s":"Album Tracks","d":[],"p":[]},{"n":"My Smile -- F# Major","s":"Album Tracks","d":[],"p":[]},{"n":"Wolves","s":"Album Tracks","d":[],"p":[]},{"n":"Tom Cruise","s":"Album Tracks","d":[],"p":[]},{"n":"On My Mind","s":"Album Tracks","d":[],"p":[]},{"n":"Money Pussy Alcohol 84.52 / 84 /","s":"Album Tracks","d":[],"p":[]},{"n":"Never Lose","s":"Album Tracks","d":[],"p":[]},{"n":"Hold Me Close","s":"Album Tracks","d":[],"p":[]},{"n":"Special","s":"Album Tracks","d":[],"p":[]},{"n":"Man Up","s":"Album Tracks","d":[],"p":[]},{"n":"Wondering","s":"Album Tracks","d":[],"p":[]},{"n":"Finnese","s":"Album Tracks","d":[],"p":[]},{"n":"Black Skinhead (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Crosses","s":"Album Tracks","d":[],"p":[]},{"n":"Nobody","s":"Album Tracks","d":[],"p":[]},{"n":"You Ain't No Model","s":"Album Tracks","d":[],"p":[]},{"n":"Creep Theme","s":"Album Tracks","d":[],"p":[]},{"n":"Good Lord","s":"Album Tracks","d":[],"p":[]},{"n":"Rich Girl","s":"Album Tracks","d":[],"p":[]},{"n":"In The Way Right","s":"Album Tracks","d":[],"p":[]},{"n":"I'm Gonna Be Alright","s":"Album Tracks","d":[],"p":[]},{"n":"Others","s":"Album Tracks","d":[],"p":[]},{"n":"4 4 4 4 MTS","s":"Album Tracks","d":[],"p":[]},{"n":"All Day (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Be That Nigga","s":"Album Tracks","d":[],"p":[]},{"n":"Depiction Of The Devil","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Get Up","s":"Album Tracks","d":[],"p":[]},{"n":"Fall Out Of Heaven","s":"Album Tracks","d":[],"p":[]},{"n":"God Level","s":"Album Tracks","d":[],"p":[]},{"n":"However You Want It","s":"Album Tracks","d":[],"p":[]},{"n":"I Am Not Home","s":"Album Tracks","d":[],"p":[]},{"n":"I Can't Let Go","s":"Album Tracks","d":[],"p":[]},{"n":"Idea","s":"Album Tracks","d":[],"p":[]},{"n":"It's Only Right","s":"Album Tracks","d":[],"p":[]},{"n":"Keahole","s":"Album Tracks","d":[],"p":[]},{"n":"Mixed","s":"Album Tracks","d":[],"p":[]},{"n":"Mrs. Misery","s":"Album Tracks","d":[],"p":[]},{"n":"My City","s":"Album Tracks","d":[],"p":[]},{"n":"Never Let Me Go","s":"Album Tracks","d":[],"p":[]},{"n":"Never Tried This","s":"Album Tracks","d":[],"p":[]},{"n":"New Angels","s":"Album Tracks","d":[],"p":[]},{"n":"Nina Chop","s":"Album Tracks","d":[],"p":[]},{"n":"Piss On Your Grave","s":"Album Tracks","d":[],"p":[]},{"n":"Roses and Revolvers","s":"Album Tracks","d":[],"p":[]},{"n":"Thank You","s":"Album Tracks","d":[],"p":[]},{"n":"Thirty-five Hunna","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]},{"n":"Beats","s":"Album Tracks","d":[],"p":[]},{"n":"Souls","s":"Album Tracks","d":[],"p":[]},{"n":"TheWorld","s":"Album Tracks","d":[],"p":[]},{"n":"Use Your Love","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Big Sean - Nothing is Stopping You","s":"Album Tracks","d":[],"p":[]},{"n":"Busta Rhymes - Thank You","s":"Album Tracks","d":[],"p":[]},{"n":"D'banj - Scape Goat","s":"Album Tracks","d":[],"p":[]},{"n":"French Montana - Ass Shots","s":"Album Tracks","d":[],"p":[]},{"n":"Future - I Won","s":"Album Tracks","d":[],"p":[]},{"n":"Pusha T - Hold On","s":"Album Tracks","d":[],"p":[]},{"n":"Rick Ross - Sanctified","s":"Album Tracks","d":[],"p":[]},{"n":"Fakes","s":"Album Tracks","d":[],"p":[]},{"n":"James Blake - Timeless","s":"Album Tracks","d":[],"p":[]}]},{"name":"So Help Me God","color":"#7e6e67","songs":[{"n":"All Day","s":"Album Tracks","d":[],"p":[]},{"n":"FourFiveSeconds","s":"Album Tracks","d":[],"p":[]},{"n":"Only One","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"Travis Scott -","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Let Your Guard Down","s":"Album Tracks","d":[],"p":[]},{"n":"Enya","s":"Album Tracks","d":[],"p":[]},{"n":"Fade","s":"Album Tracks","d":[],"p":[]},{"n":"Floatin","s":"Album Tracks","d":[],"p":[]},{"n":"French Montana - Ass Shots","s":"Album Tracks","d":[],"p":[]},{"n":"Go Pro","s":"Album Tracks","d":[],"p":[]},{"n":"How You Feeling","s":"Album Tracks","d":[],"p":[]},{"n":"I Feel Like That","s":"Album Tracks","d":[],"p":[]},{"n":"I Know When I Know It","s":"Album Tracks","d":[],"p":[]},{"n":"Mass Appeal","s":"Album Tracks","d":[],"p":[]},{"n":"New Rihanna","s":"Album Tracks","d":[],"p":[]},{"n":"Prayer","s":"Album Tracks","d":[],"p":[]},{"n":"Rihanna - Fell In Love (Heaven)","s":"Album Tracks","d":[],"p":[]},{"n":"Southside Serenade","s":"Album Tracks","d":[],"p":[]},{"n":"Star Time","s":"Album Tracks","d":[],"p":[]},{"n":"That's On You","s":"Album Tracks","d":[],"p":[]},{"n":"Ty Dolla $ign - Woke Up","s":"Album Tracks","d":[],"p":[]},{"n":"Ultimate Lie","s":"Album Tracks","d":[],"p":[]},{"n":"You Know It","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"G Minor/*E","s":"Album Tracks","d":[],"p":[]},{"n":"Beyonc\u00e9 - Drunk in Love (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Chief Keef - Nobody","s":"Album Tracks","d":[],"p":[]},{"n":"John Legend - Never Enough","s":"Album Tracks","d":[],"p":[]},{"n":"Theophilus London - Can't Stop","s":"Album Tracks","d":[],"p":[]},{"n":"Tyler, the Creator - SMUCKERS","s":"Album Tracks","d":[],"p":[]},{"n":"Vic Mensa - U Mad","s":"Album Tracks","d":[],"p":[]},{"n":"Wale - The Summer League","s":"Album Tracks","d":[],"p":[]},{"n":"Big Sean Collaborations","s":"Album Tracks","d":[],"p":[]},{"n":"Big Sean - All Your Fault","s":"Album Tracks","d":[],"p":[]},{"n":"Big Sean - Blessings [Extended Version]","s":"Album Tracks","d":[],"p":[]},{"n":"Big Sean - One Man Can Change the World","s":"Album Tracks","d":[],"p":[]},{"n":"Big Sean - Stay Down","s":"Album Tracks","d":[],"p":[]}]},{"name":"SWISH","color":"#fa5f5f","songs":[{"n":"Anxiety","s":"Album Tracks","d":[],"p":[]},{"n":"Bad Night","s":"Album Tracks","d":[],"p":[]},{"n":"Code Red","s":"Album Tracks","d":[],"p":[]},{"n":"Pressure","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Jump","s":"Album Tracks","d":[],"p":[]},{"n":"Envious","s":"Album Tracks","d":[],"p":[]},{"n":"Motivated","s":"Album Tracks","d":[],"p":[]},{"n":"Over","s":"Album Tracks","d":[],"p":[]},{"n":"Famous","s":"Album Tracks","d":[],"p":[]},{"n":"Father Stretch","s":"Album Tracks","d":[],"p":[]},{"n":"FMLU","s":"Album Tracks","d":[],"p":[]},{"n":"Forever","s":"Album Tracks","d":[],"p":[]},{"n":"Highlights","s":"Album Tracks","d":[],"p":[]},{"n":"High Life","s":"Album Tracks","d":[],"p":[]},{"n":"Hold Tight","s":"Album Tracks","d":[],"p":[]},{"n":"Interlude III","s":"Album Tracks","d":[],"p":[]},{"n":"Pick Up Your Speed","s":"Album Tracks","d":[],"p":[]},{"n":"Rich Nigga Drunk","s":"Album Tracks","d":[],"p":[]},{"n":"The Mall","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"The Game - Mula","s":"Album Tracks","d":[],"p":[]},{"n":"The Weeknd - Tell Your Friends","s":"Album Tracks","d":[],"p":[]},{"n":"Travis Scott - Piss On Your Grave","s":"Album Tracks","d":[],"p":[]},{"n":"Ty Dolla $ign - Guard Down","s":"Album Tracks","d":[],"p":[]}]},{"name":"The Life Of Pablo","color":"#fa8850","songs":[{"n":"Ultralight Beam","s":"Album Tracks","d":[],"p":[]},{"n":"Father Stretch My Hands Pt.","s":"Album Tracks","d":[],"p":[]},{"n":"Pt.","s":"Album Tracks","d":[],"p":[]},{"n":"Famous","s":"Album Tracks","d":[],"p":[]},{"n":"Feedback","s":"Album Tracks","d":[],"p":[]},{"n":"Low Lights","s":"Album Tracks","d":[],"p":[]},{"n":"Highlights","s":"Album Tracks","d":[],"p":[]},{"n":"Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"I Love Kanye","s":"Album Tracks","d":[],"p":[]},{"n":"Waves","s":"Album Tracks","d":[],"p":[]},{"n":"FML","s":"Album Tracks","d":[],"p":[]},{"n":"Real Friends","s":"Album Tracks","d":[],"p":[]},{"n":"Wolves","s":"Album Tracks","d":[],"p":[]},{"n":"Frank's Track","s":"Album Tracks","d":[],"p":[]},{"n":"Siiiiiiiiilver Surffffeeeeer Intermission It's a voice It's a voice It's a voice","s":"Album Tracks","d":[],"p":[]},{"n":"30 Hours","s":"Album Tracks","d":[],"p":[]},{"n":"No More Parties In LA","s":"Album Tracks","d":[],"p":[]},{"n":"Facts (Charlie Heat Version)","s":"Album Tracks","d":[],"p":[]},{"n":"Fade","s":"Album Tracks","d":[],"p":[]},{"n":"Saint Pablo","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Alicia Keys - In Common (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Desiigner - Caliber","s":"Album Tracks","d":[],"p":[]},{"n":"Diddy - Intro","s":"Album Tracks","d":[],"p":[]},{"n":"Future - In Abundance","s":"Album Tracks","d":[],"p":[]},{"n":"Post Malone - Fuck The Internet","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"Come And Go","s":"Album Tracks","d":[],"p":[]},{"n":"Fade [V1/V2 Remix]","s":"Album Tracks","d":[],"p":[]},{"n":"Spread My Wings","s":"Album Tracks","d":[],"p":[]},{"n":"DJDS Beats","s":"Album Tracks","d":[],"p":[]},{"n":"Friend Of Mine","s":"Album Tracks","d":[],"p":[]},{"n":"Get Real High","s":"Album Tracks","d":[],"p":[]},{"n":"We Deserve","s":"Album Tracks","d":[],"p":[]},{"n":"Kendrick Lamar Freestyle Sessions","s":"Album Tracks","d":[],"p":[]},{"n":"Madlib Freestyle","s":"Album Tracks","d":[],"p":[]}]},{"name":"Wolves","color":"#06f899","songs":[{"n":"Glow","s":"Album Tracks","d":[],"p":[]},{"n":"Hotline Bling (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Pop Style","s":"Album Tracks","d":[],"p":[]},{"n":"Revenge","s":"Album Tracks","d":[],"p":[]},{"n":"Unrecorded Beats","s":"Album Tracks","d":[],"p":[]},{"n":"Friend","s":"Album Tracks","d":[],"p":[]},{"n":"Precon","s":"Album Tracks","d":[],"p":[]},{"n":"Rasp","s":"Album Tracks","d":[],"p":[]},{"n":"Sail","s":"Album Tracks","d":[],"p":[]}]},{"name":"TurboGrafx16","color":"#6956ce","songs":[{"n":"10k HRS & A DREAM","s":"Album Tracks","d":[],"p":[]},{"n":"Damn Come On","s":"Album Tracks","d":[],"p":[]},{"n":"Deja Vu","s":"Album Tracks","d":[],"p":[]},{"n":"Feel Me","s":"Album Tracks","d":[],"p":[]},{"n":"Friends","s":"Album Tracks","d":[],"p":[]},{"n":"Only","s":"Album Tracks","d":[],"p":[]},{"n":"Rap Tarantino","s":"Album Tracks","d":[],"p":[]},{"n":"Sell Your Soul","s":"Album Tracks","d":[],"p":[]},{"n":"Charlie Heat Collaborations","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Act Like You Care","s":"Album Tracks","d":[],"p":[]},{"n":"Hold Tight","s":"Album Tracks","d":[],"p":[]},{"n":"No Reason","s":"Album Tracks","d":[],"p":[]},{"n":"Beats & Songs confirmed by Keyon Christ","s":"Album Tracks","d":[],"p":[]},{"n":"2 Rihannas","s":"Album Tracks","d":[],"p":[]},{"n":"BigSur","s":"Album Tracks","d":[],"p":[]},{"n":"Face Down","s":"Album Tracks","d":[],"p":[]},{"n":"Forever","s":"Album Tracks","d":[],"p":[]},{"n":"Junglecore","s":"Album Tracks","d":[],"p":[]},{"n":"LemonLime","s":"Album Tracks","d":[],"p":[]},{"n":"No Man's Sky","s":"Album Tracks","d":[],"p":[]},{"n":"M.I.A","s":"Album Tracks","d":[],"p":[]},{"n":"ohmygod","s":"Album Tracks","d":[],"p":[]},{"n":"Rick Flair","s":"Album Tracks","d":[],"p":[]},{"n":"Rise And Fall","s":"Album Tracks","d":[],"p":[]},{"n":"Survive","s":"Album Tracks","d":[],"p":[]},{"n":"Zulu","s":"Album Tracks","d":[],"p":[]},{"n":"Unleaked Songs","s":"Album Tracks","d":[],"p":[]},{"n":"Knock","s":"Album Tracks","d":[],"p":[]},{"n":"Save It","s":"Album Tracks","d":[],"p":[]},{"n":"Weather Report 94 ?? ??","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"A Tribe Called Quest - The Killing Season","s":"Album Tracks","d":[],"p":[]},{"n":"Big Sean - Bounce Back","s":"Album Tracks","d":[],"p":[]},{"n":"Chance the Rapper - All We Got","s":"Album Tracks","d":[],"p":[]},{"n":"Desiigner - Tiimmy Turner (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"French Montana - Figure it Out","s":"Album Tracks","d":[],"p":[]},{"n":"Gucci Mane - Pussy Print","s":"Album Tracks","d":[],"p":[]},{"n":"Juicy J - Ballin","s":"Album Tracks","d":[],"p":[]},{"n":"ScHoolboy Q - THat Part","s":"Album Tracks","d":[],"p":[]},{"n":"Tyler, The Creator - John Ross","s":"Album Tracks","d":[],"p":[]},{"n":"Francis and the Lights - My Citys Gone","s":"Album Tracks","d":[],"p":[]},{"n":"Production","s":"Album Tracks","d":[],"p":[]},{"n":"Christina Aguilera - Maria","s":"Album Tracks","d":[],"p":[]}]},{"name":"Cruel Winter [V2]","color":"#f2b868","songs":[{"n":"Champions","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"All I Know","s":"Album Tracks","d":[],"p":[]},{"n":"Castro","s":"Album Tracks","d":[],"p":[]},{"n":"Circle","s":"Album Tracks","d":[],"p":[]},{"n":"Face Down","s":"Album Tracks","d":[],"p":[]},{"n":"Panda (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Spaceship","s":"Album Tracks","d":[],"p":[]}]},{"name":"LOVE EVERYONE","color":"#80c0da","songs":[{"n":"I Feel Free","s":"Album Tracks","d":[],"p":[]},{"n":"Extacy","s":"Album Tracks","d":[],"p":[]},{"n":"Pussy Mine","s":"Album Tracks","d":[],"p":[]},{"n":"Wouldn't Leave","s":"Album Tracks","d":[],"p":[]},{"n":"Thirty Mile Zone","s":"Album Tracks","d":[],"p":[]},{"n":"Moonlight","s":"Album Tracks","d":[],"p":[]},{"n":"Violent Nights","s":"Album Tracks","d":[],"p":[]},{"n":"Y'all Seen Ye?","s":"Album Tracks","d":[],"p":[]},{"n":"Mrs Robinson","s":"Album Tracks","d":[],"p":[]},{"n":"Lift Yourself","s":"Album Tracks","d":[],"p":[]},{"n":"Singles","s":"Album Tracks","d":[],"p":[]},{"n":"BED YEEZY SEASON","s":"Album Tracks","d":[],"p":[]},{"n":"Ye vs The People","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"Amistad","s":"Album Tracks","d":[],"p":[]},{"n":"Bad People","s":"Album Tracks","d":[],"p":[]},{"n":"Brothers","s":"Album Tracks","d":[],"p":[]},{"n":"Cops Shot The Kid","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Khaled's Son","s":"Album Tracks","d":[],"p":[]},{"n":"Freddy","s":"Album Tracks","d":[],"p":[]},{"n":"How Do You Respond?","s":"Album Tracks","d":[],"p":[]},{"n":"Let It Go","s":"Album Tracks","d":[],"p":[]},{"n":"Let You Go","s":"Album Tracks","d":[],"p":[]},{"n":"Mac N Cheese","s":"Album Tracks","d":[],"p":[]},{"n":"Maria","s":"Album Tracks","d":[],"p":[]},{"n":"Simple Things","s":"Album Tracks","d":[],"p":[]},{"n":"Skeletons","s":"Album Tracks","d":[],"p":[]},{"n":"Untitled*","s":"Album Tracks","d":[],"p":[]},{"n":"Yikes","s":"Album Tracks","d":[],"p":[]},{"n":"Chance the Rapper - Pets","s":"Album Tracks","d":[],"p":[]},{"n":"A$AP Rocky - Music Is Above You","s":"Album Tracks","d":[],"p":[]},{"n":"A$AP Rocky - Yeezy My","s":"Album Tracks","d":[],"p":[]},{"n":"Instrumentals","s":"Album Tracks","d":[],"p":[]},{"n":"Arrival Horns 83 - -","s":"Album Tracks","d":[],"p":[]},{"n":"Chop","s":"Album Tracks","d":[],"p":[]},{"n":"Chop 15 88.97 - -","s":"Album Tracks","d":[],"p":[]},{"n":"Yeah","s":"Album Tracks","d":[],"p":[]},{"n":"Ant Clemons Tracks","s":"Album Tracks","d":[],"p":[]},{"n":"Ant Clemons - Pootie Tang","s":"Album Tracks","d":[],"p":[]},{"n":"Freaky Deaky","s":"Album Tracks","d":[],"p":[]},{"n":"Make It Out","s":"Album Tracks","d":[],"p":[]},{"n":"Nine Eleven","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]},{"n":"Justin Vernon / Bon Iver Collaborations","s":"Album Tracks","d":[],"p":[]},{"n":"Fanfare Bowl","s":"Album Tracks","d":[],"p":[]},{"n":"I Can Hear Cryin'","s":"Album Tracks","d":[],"p":[]},{"n":"Leroi","s":"Album Tracks","d":[],"p":[]},{"n":"Not Us","s":"Album Tracks","d":[],"p":[]},{"n":"Take Me To The Light","s":"Album Tracks","d":[],"p":[]},{"n":"Fall On My Face","s":"Album Tracks","d":[],"p":[]},{"n":"Bastard Child 70 --","s":"Album Tracks","d":[],"p":[]},{"n":"Sam + Zach","s":"Album Tracks","d":[],"p":[]},{"n":"Talib Kweli Collab EP","s":"Album Tracks","d":[],"p":[]},{"n":"Chop 5 76 - -","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"CyHi the Prynce - Dat Side","s":"Album Tracks","d":[],"p":[]},{"n":"Mary J. Blige - Love Yourself","s":"Album Tracks","d":[],"p":[]},{"n":"Tyga - Feel Me","s":"Album Tracks","d":[],"p":[]},{"n":"Yo Gotti - Castro","s":"Album Tracks","d":[],"p":[]}]},{"name":"DAYTONA","color":"#c54039","songs":[{"n":"If You Know You Know","s":"Album Tracks","d":[],"p":[]},{"n":"The Games We Play","s":"Album Tracks","d":[],"p":[]},{"n":"Hard Piano","s":"Album Tracks","d":[],"p":[]},{"n":"Come Back Baby","s":"Album Tracks","d":[],"p":[]},{"n":"Santeria C# Minor*/G","s":"Album Tracks","d":[],"p":[]},{"n":"What Would Meek Do?","s":"Album Tracks","d":[],"p":[]},{"n":"Infrared","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"Bad Mon'","s":"Album Tracks","d":[],"p":[]},{"n":"Cold Blooded","s":"Album Tracks","d":[],"p":[]},{"n":"Ghosts","s":"Album Tracks","d":[],"p":[]},{"n":"Gold","s":"Album Tracks","d":[],"p":[]},{"n":"Lord Forgive Em","s":"Album Tracks","d":[],"p":[]},{"n":"Objects In The Mirror","s":"Album Tracks","d":[],"p":[]},{"n":"Real Gon' Come","s":"Album Tracks","d":[],"p":[]},{"n":"Santeria (OG)","s":"Album Tracks","d":[],"p":[]},{"n":"Sisters and Brothers","s":"Album Tracks","d":[],"p":[]},{"n":"Sociopath","s":"Album Tracks","d":[],"p":[]},{"n":"Treat You Good","s":"Album Tracks","d":[],"p":[]},{"n":"Rich The Kid - Can't Afford It","s":"Album Tracks","d":[],"p":[]}]},{"name":"ye","color":"#3284cc","songs":[{"n":"I Thought About Killing You","s":"Album Tracks","d":[],"p":[]},{"n":"Yikes","s":"Album Tracks","d":[],"p":[]},{"n":"All Mine","s":"Album Tracks","d":[],"p":[]},{"n":"Wouldn't Leave","s":"Album Tracks","d":[],"p":[]},{"n":"No Mistakes","s":"Album Tracks","d":[],"p":[]},{"n":"Ghost Town","s":"Album Tracks","d":[],"p":[]},{"n":"Violent Crimes","s":"Album Tracks","d":[],"p":[]},{"n":"Singles","s":"Album Tracks","d":[],"p":[]},{"n":"XTCY","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Travis Scott - Watch","s":"Album Tracks","d":[],"p":[]},{"n":"Teyana Taylor - Hurry","s":"Album Tracks","d":[],"p":[]},{"n":"Pusha T - What Would Meek Do?","s":"Album Tracks","d":[],"p":[]},{"n":"Others??????","s":"Album Tracks","d":[],"p":[]},{"n":"Chaos Chaos - Kanye's B-Day Song","s":"Album Tracks","d":[],"p":[]}]},{"name":"KIDS SEE GHOSTS","color":"#0681f8","songs":[{"n":"Feel The Love","s":"Album Tracks","d":[],"p":[]},{"n":"Fire","s":"Album Tracks","d":[],"p":[]},{"n":"4th Dimension","s":"Album Tracks","d":[],"p":[]},{"n":"Freeee (Ghost Town Pt. 2)","s":"Album Tracks","d":[],"p":[]},{"n":"Reborn","s":"Album Tracks","d":[],"p":[]},{"n":"Kids See Ghosts","s":"Album Tracks","d":[],"p":[]},{"n":"Cudi Montage","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"Devil's Watchin","s":"Album Tracks","d":[],"p":[]},{"n":"XTCY","s":"Album Tracks","d":[],"p":[]}]},{"name":"NASIR","color":"#7e6767","songs":[{"n":"Not For Radio","s":"Album Tracks","d":[],"p":[]},{"n":"Cops Shot the Kid","s":"Album Tracks","d":[],"p":[]},{"n":"White Label","s":"Album Tracks","d":[],"p":[]},{"n":"Bonjour 143 --","s":"Album Tracks","d":[],"p":[]},{"n":"everything","s":"Album Tracks","d":[],"p":[]},{"n":"Adam & Eve","s":"Album Tracks","d":[],"p":[]},{"n":"Simple Things","s":"Album Tracks","d":[],"p":[]}]},{"name":"Good Ass Job (2018)","color":"#ed2ad0","songs":[{"n":"All We Got Is Love","s":"Album Tracks","d":[],"p":[]},{"n":"Anxiety","s":"Album Tracks","d":[],"p":[]},{"n":"Back In This Bitch Like","s":"Album Tracks","d":[],"p":[]},{"n":"Bars","s":"Album Tracks","d":[],"p":[]},{"n":"Best Of","s":"Album Tracks","d":[],"p":[]},{"n":"Black Men Don't Cheat","s":"Album Tracks","d":[],"p":[]},{"n":"Chance Liked","s":"Album Tracks","d":[],"p":[]},{"n":"Chop 1B","s":"Album Tracks","d":[],"p":[]},{"n":"Chop","s":"Album Tracks","d":[],"p":[]},{"n":"Clouted Up","s":"Album Tracks","d":[],"p":[]},{"n":"Do You Believe","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Let Me Down","s":"Album Tracks","d":[],"p":[]},{"n":"Fallout","s":"Album Tracks","d":[],"p":[]},{"n":"Family","s":"Album Tracks","d":[],"p":[]},{"n":"Gimme a Call (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Good Ass Job","s":"Album Tracks","d":[],"p":[]},{"n":"Good Job","s":"Album Tracks","d":[],"p":[]},{"n":"Good Things Don't Last","s":"Album Tracks","d":[],"p":[]},{"n":"Gun Or God","s":"Album Tracks","d":[],"p":[]},{"n":"Hold It Down","s":"Album Tracks","d":[],"p":[]},{"n":"How To Go Crazy","s":"Album Tracks","d":[],"p":[]},{"n":"I Feel Everything","s":"Album Tracks","d":[],"p":[]},{"n":"J.J. What","s":"Album Tracks","d":[],"p":[]},{"n":"Like The Internet","s":"Album Tracks","d":[],"p":[]},{"n":"MJ","s":"Album Tracks","d":[],"p":[]},{"n":"On The Line","s":"Album Tracks","d":[],"p":[]},{"n":"Oscar The Grouch","s":"Album Tracks","d":[],"p":[]},{"n":"Park","s":"Album Tracks","d":[],"p":[]},{"n":"Pets","s":"Album Tracks","d":[],"p":[]},{"n":"Short Fuse","s":"Album Tracks","d":[],"p":[]},{"n":"Slide Around","s":"Album Tracks","d":[],"p":[]},{"n":"Timeout","s":"Album Tracks","d":[],"p":[]},{"n":"You Were My","s":"Album Tracks","d":[],"p":[]},{"n":"Ant Clemons - T-Shirt","s":"Album Tracks","d":[],"p":[]},{"n":"Lil Yachty - OOPS","s":"Album Tracks","d":[],"p":[]}]},{"name":"Yandhi [V1]","color":"#8e5ffa","songs":[{"n":"Alien","s":"Album Tracks","d":[],"p":[]},{"n":"Bye Bye Baby","s":"Album Tracks","d":[],"p":[]},{"n":"Hurricane","s":"Album Tracks","d":[],"p":[]},{"n":"I Love It","s":"Album Tracks","d":[],"p":[]},{"n":"Last Name","s":"Album Tracks","d":[],"p":[]},{"n":"New Body","s":"Album Tracks","d":[],"p":[]},{"n":"Sky City","s":"Album Tracks","d":[],"p":[]},{"n":"The Garden (SNL Version)","s":"Album Tracks","d":[],"p":[]},{"n":"The Storm","s":"Album Tracks","d":[],"p":[]},{"n":"Chakras","s":"Album Tracks","d":[],"p":[]},{"n":"We Got Love","s":"Album Tracks","d":[],"p":[]},{"n":"Misc. Leaks (Freestyles)","s":"Album Tracks","d":[],"p":[]},{"n":"20th","s":"Album Tracks","d":[],"p":[]},{"n":"120th","s":"Album Tracks","d":[],"p":[]},{"n":"124th","s":"Album Tracks","d":[],"p":[]},{"n":"AC4","s":"Album Tracks","d":[],"p":[]},{"n":"Again","s":"Album Tracks","d":[],"p":[]},{"n":"All Blue Don C's","s":"Album Tracks","d":[],"p":[]},{"n":"BH2","s":"Album Tracks","d":[],"p":[]},{"n":"Bitches Do Voodoo","s":"Album Tracks","d":[],"p":[]},{"n":"Bottom Line","s":"Album Tracks","d":[],"p":[]},{"n":"Brothers","s":"Album Tracks","d":[],"p":[]},{"n":"Curfew","s":"Album Tracks","d":[],"p":[]},{"n":"Dip","s":"Album Tracks","d":[],"p":[]},{"n":"DRB ABD","s":"Album Tracks","d":[],"p":[]},{"n":"Ever Bryan","s":"Album Tracks","d":[],"p":[]},{"n":"God Is Love","s":"Album Tracks","d":[],"p":[]},{"n":"Goodbye Piano -- F# Major","s":"Album Tracks","d":[],"p":[]},{"n":"Godzilla","s":"Album Tracks","d":[],"p":[]},{"n":"Lovely","s":"Album Tracks","d":[],"p":[]},{"n":"Make Cap","s":"Album Tracks","d":[],"p":[]},{"n":"Mary Jane Girls ~137 E Major","s":"Album Tracks","d":[],"p":[]},{"n":"We Free","s":"Album Tracks","d":[],"p":[]},{"n":"House Party","s":"Album Tracks","d":[],"p":[]},{"n":"F Minor/Bb","s":"Album Tracks","d":[],"p":[]},{"n":"Intro","s":"Album Tracks","d":[],"p":[]},{"n":"Houston We Got A Problem","s":"Album Tracks","d":[],"p":[]},{"n":"Me Too G Major*/Ab","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"2 Chainz - Momma I Hit A Lick","s":"Album Tracks","d":[],"p":[]},{"n":"6ix9ine - KANGA","s":"Album Tracks","d":[],"p":[]},{"n":"6ix9ine - MAMA","s":"Album Tracks","d":[],"p":[]},{"n":"Caiden The Crownholder - Drip","s":"Album Tracks","d":[],"p":[]},{"n":"Smokepurrp - No Problem","s":"Album Tracks","d":[],"p":[]},{"n":"YNW Melly - Mixed Personalities","s":"Album Tracks","d":[],"p":[]},{"n":"XXXTentacion - One Minute","s":"Album Tracks","d":[],"p":[]},{"n":"Ty Dolla $ign - Tap In","s":"Album Tracks","d":[],"p":[]}]},{"name":"Yandhi [V2]","color":"#de207e","songs":[{"n":"Jam","s":"Album Tracks","d":[],"p":[]},{"n":"Cash To Burn","s":"Album Tracks","d":[],"p":[]},{"n":"Jam 14 (StereoSine Version)","s":"Album Tracks","d":[],"p":[]},{"n":"Jam 14 (Evax Version)","s":"Album Tracks","d":[],"p":[]},{"n":"Melly Collaborations","s":"Album Tracks","d":[],"p":[]},{"n":"Bag New","s":"Album Tracks","d":[],"p":[]},{"n":"Color","s":"Album Tracks","d":[],"p":[]},{"n":"Lil Floyd 1 127.60 -","s":"Album Tracks","d":[],"p":[]},{"n":"Lil Floyd","s":"Album Tracks","d":[],"p":[]},{"n":"Overdose","s":"Album Tracks","d":[],"p":[]},{"n":"Real Soul","s":"Album Tracks","d":[],"p":[]},{"n":"Tom Raider","s":"Album Tracks","d":[],"p":[]},{"n":"Unnamed Freestyles","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]},{"n":"Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"Freestyle 11 116 --","s":"Album Tracks","d":[],"p":[]},{"n":"Freestyle 9 106 --","s":"Album Tracks","d":[],"p":[]},{"n":"GG Sample","s":"Album Tracks","d":[],"p":[]},{"n":"Juicy","s":"Album Tracks","d":[],"p":[]},{"n":"Lara Croff","s":"Album Tracks","d":[],"p":[]},{"n":"Soul Children (Collaborative Project with E.VAX)","s":"Album Tracks","d":[],"p":[]},{"n":"Unhomme","s":"Album Tracks","d":[],"p":[]},{"n":"Soul Children","s":"Album Tracks","d":[],"p":[]},{"n":"Nyce Vieux","s":"Album Tracks","d":[],"p":[]},{"n":"Elsa Laurent","s":"Album Tracks","d":[],"p":[]},{"n":"Wayback","s":"Album Tracks","d":[],"p":[]},{"n":"NY Dreams","s":"Album Tracks","d":[],"p":[]},{"n":"Joicing","s":"Album Tracks","d":[],"p":[]},{"n":"Real Mannish","s":"Album Tracks","d":[],"p":[]},{"n":"Lill Lindfors","s":"Album Tracks","d":[],"p":[]},{"n":"Linda Perhacs","s":"Album Tracks","d":[],"p":[]},{"n":"Emerald Web","s":"Album Tracks","d":[],"p":[]},{"n":"Novi Torpedo","s":"Album Tracks","d":[],"p":[]},{"n":"Uke Kaan","s":"Album Tracks","d":[],"p":[]},{"n":"Extra E.VAX Collaborations","s":"Album Tracks","d":[],"p":[]},{"n":"Christ","s":"Album Tracks","d":[],"p":[]},{"n":"Sever","s":"Album Tracks","d":[],"p":[]},{"n":"That Was A Good One","s":"Album Tracks","d":[],"p":[]},{"n":"Tee Grizzley Collaborations","s":"Album Tracks","d":[],"p":[]},{"n":"Detroit","s":"Album Tracks","d":[],"p":[]},{"n":"Routine","s":"Album Tracks","d":[],"p":[]},{"n":"Spread Your Wings","s":"Album Tracks","d":[],"p":[]},{"n":"Survive","s":"Album Tracks","d":[],"p":[]},{"n":"CyHi Collaborations","s":"Album Tracks","d":[],"p":[]},{"n":"All Dreams Real","s":"Album Tracks","d":[],"p":[]},{"n":"Come Home","s":"Album Tracks","d":[],"p":[]},{"n":"Echelon","s":"Album Tracks","d":[],"p":[]},{"n":"Isotoner","s":"Album Tracks","d":[],"p":[]},{"n":"Law Of Attraction","s":"Album Tracks","d":[],"p":[]},{"n":"Photo","s":"Album Tracks","d":[],"p":[]},{"n":"Souleros","s":"Album Tracks","d":[],"p":[]},{"n":"Caliveli Freestyles","s":"Album Tracks","d":[],"p":[]},{"n":"He's Back","s":"Album Tracks","d":[],"p":[]},{"n":"I Wasn't Christian Enough","s":"Album Tracks","d":[],"p":[]},{"n":"Look What Nerds Do","s":"Album Tracks","d":[],"p":[]},{"n":"Pull Up","s":"Album Tracks","d":[],"p":[]},{"n":"Wouldn't Be Here","s":"Album Tracks","d":[],"p":[]},{"n":"Misc Freestyles","s":"Album Tracks","d":[],"p":[]},{"n":"Ain't No Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"Amazing","s":"Album Tracks","d":[],"p":[]},{"n":"Bad New","s":"Album Tracks","d":[],"p":[]},{"n":"Baddddd Little Darling","s":"Album Tracks","d":[],"p":[]},{"n":"Bipolar","s":"Album Tracks","d":[],"p":[]},{"n":"Biscanye","s":"Album Tracks","d":[],"p":[]},{"n":"Cuban Link","s":"Album Tracks","d":[],"p":[]},{"n":"Deadalus","s":"Album Tracks","d":[],"p":[]},{"n":"End Of It","s":"Album Tracks","d":[],"p":[]},{"n":"Freak","s":"Album Tracks","d":[],"p":[]},{"n":"Go Now","s":"Album Tracks","d":[],"p":[]},{"n":"Healing","s":"Album Tracks","d":[],"p":[]},{"n":"Heights","s":"Album Tracks","d":[],"p":[]},{"n":"High Sound","s":"Album Tracks","d":[],"p":[]},{"n":"Home","s":"Album Tracks","d":[],"p":[]},{"n":"Homestead","s":"Album Tracks","d":[],"p":[]},{"n":"IG","s":"Album Tracks","d":[],"p":[]},{"n":"Joyride","s":"Album Tracks","d":[],"p":[]},{"n":"Need You Now","s":"Album Tracks","d":[],"p":[]},{"n":"Oh Yeah 120 --","s":"Album Tracks","d":[],"p":[]},{"n":"Ozark","s":"Album Tracks","d":[],"p":[]},{"n":"Raimonds Pauls","s":"Album Tracks","d":[],"p":[]},{"n":"Redlo","s":"Album Tracks","d":[],"p":[]},{"n":"Robinhood","s":"Album Tracks","d":[],"p":[]},{"n":"Sleep Won't Help","s":"Album Tracks","d":[],"p":[]},{"n":"Shoot It","s":"Album Tracks","d":[],"p":[]},{"n":"Superheroes","s":"Album Tracks","d":[],"p":[]},{"n":"The Garden","s":"Album Tracks","d":[],"p":[]},{"n":"Tim Snow","s":"Album Tracks","d":[],"p":[]},{"n":"Wakey Wakey","s":"Album Tracks","d":[],"p":[]},{"n":"Ye","s":"Album Tracks","d":[],"p":[]}]},{"name":"JESUS IS KING","color":"#0f32ef","songs":[{"n":"Every Hour","s":"Album Tracks","d":[],"p":[]},{"n":"Selah","s":"Album Tracks","d":[],"p":[]},{"n":"Follow God","s":"Album Tracks","d":[],"p":[]},{"n":"Closed on Sunday","s":"Album Tracks","d":[],"p":[]},{"n":"On God","s":"Album Tracks","d":[],"p":[]},{"n":"Everything We Need","s":"Album Tracks","d":[],"p":[]},{"n":"Water","s":"Album Tracks","d":[],"p":[]},{"n":"God Is","s":"Album Tracks","d":[],"p":[]},{"n":"Hands On","s":"Album Tracks","d":[],"p":[]},{"n":"Use This Gospel","s":"Album Tracks","d":[],"p":[]},{"n":"Jesus Is Lord","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"All Dreams Real","s":"Album Tracks","d":[],"p":[]},{"n":"Bound","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Give Up","s":"Album Tracks","d":[],"p":[]},{"n":"Free","s":"Album Tracks","d":[],"p":[]},{"n":"Glory","s":"Album Tracks","d":[],"p":[]},{"n":"I Know God Breathed On This","s":"Album Tracks","d":[],"p":[]},{"n":"In The Morning","s":"Album Tracks","d":[],"p":[]},{"n":"LA Monster","s":"Album Tracks","d":[],"p":[]},{"n":"Let It Go","s":"Album Tracks","d":[],"p":[]},{"n":"New Beat","s":"Album Tracks","d":[],"p":[]},{"n":"Prayer","s":"Album Tracks","d":[],"p":[]},{"n":"Sweet Jesus","s":"Album Tracks","d":[],"p":[]},{"n":"Through The Valley","s":"Album Tracks","d":[],"p":[]},{"n":"Up From The Ashes","s":"Album Tracks","d":[],"p":[]},{"n":"Wake The Dead","s":"Album Tracks","d":[],"p":[]},{"n":"Freestyles","s":"Album Tracks","d":[],"p":[]},{"n":"Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Francis and the Lights - Take Me To The","s":"Album Tracks","d":[],"p":[]},{"n":"Tyler, The Creator - Puppet","s":"Album Tracks","d":[],"p":[]},{"n":"Ashes","s":"Album Tracks","d":[],"p":[]},{"n":"Misc.","s":"Album Tracks","d":[],"p":[]},{"n":"I Need The Lord","s":"Album Tracks","d":[],"p":[]},{"n":"The Offering","s":"Album Tracks","d":[],"p":[]},{"n":"This Is The Glory","s":"Album Tracks","d":[],"p":[]}]},{"name":"God's Country","color":"#2929d5","songs":[{"n":"Let The Spirit Go Wild","s":"Album Tracks","d":[],"p":[]},{"n":"He Gave It All","s":"Album Tracks","d":[],"p":[]},{"n":"Lord I Need You","s":"Album Tracks","d":[],"p":[]},{"n":"Palm Springs","s":"Album Tracks","d":[],"p":[]},{"n":"Wash Us In The Blood","s":"Album Tracks","d":[],"p":[]},{"n":"Fighting Fires","s":"Album Tracks","d":[],"p":[]},{"n":"Awakening","s":"Album Tracks","d":[],"p":[]},{"n":"Eternal Life","s":"Album Tracks","d":[],"p":[]},{"n":"12,000 Acres","s":"Album Tracks","d":[],"p":[]},{"n":"Future Bounce","s":"Album Tracks","d":[],"p":[]},{"n":"Freedom","s":"Album Tracks","d":[],"p":[]},{"n":"All Praises Due Him","s":"Album Tracks","d":[],"p":[]},{"n":"Prayed Up","s":"Album Tracks","d":[],"p":[]},{"n":"Sinners","s":"Album Tracks","d":[],"p":[]},{"n":"Spotlight","s":"Album Tracks","d":[],"p":[]},{"n":"Tulsa","s":"Album Tracks","d":[],"p":[]},{"n":"Skuuurrruurrr","s":"Album Tracks","d":[],"p":[]},{"n":"Travis Scott Yetopia References","s":"Album Tracks","d":[],"p":[]},{"n":"Travis Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"Misc. Songs","s":"Album Tracks","d":[],"p":[]},{"n":"Bank","s":"Album Tracks","d":[],"p":[]},{"n":"Breeverly","s":"Album Tracks","d":[],"p":[]},{"n":"Codeine (God's Country Version) 82.5 --","s":"Album Tracks","d":[],"p":[]},{"n":"Cops Flash Put Em Up","s":"Album Tracks","d":[],"p":[]},{"n":"Everybody Goes","s":"Album Tracks","d":[],"p":[]},{"n":"Go Legendary 125 --","s":"Album Tracks","d":[],"p":[]},{"n":"Grace N Mercy","s":"Album Tracks","d":[],"p":[]},{"n":"He Did The Most","s":"Album Tracks","d":[],"p":[]},{"n":"Head Down","s":"Album Tracks","d":[],"p":[]},{"n":"Hear Our Prayers","s":"Album Tracks","d":[],"p":[]},{"n":"How Ya Feel ~128 Eb Major","s":"Album Tracks","d":[],"p":[]},{"n":"Idea 2 ~152 C Minor","s":"Album Tracks","d":[],"p":[]},{"n":"Jah","s":"Album Tracks","d":[],"p":[]},{"n":"Jas","s":"Album Tracks","d":[],"p":[]},{"n":"Northside Kings","s":"Album Tracks","d":[],"p":[]},{"n":"Oh Lord","s":"Album Tracks","d":[],"p":[]},{"n":"Rise Up","s":"Album Tracks","d":[],"p":[]},{"n":"Run Home","s":"Album Tracks","d":[],"p":[]},{"n":"Serving God","s":"Album Tracks","d":[],"p":[]},{"n":"Shotta","s":"Album Tracks","d":[],"p":[]},{"n":"Thank God I Breathe","s":"Album Tracks","d":[],"p":[]},{"n":"Other References","s":"Album Tracks","d":[],"p":[]},{"n":"Before I Go","s":"Album Tracks","d":[],"p":[]},{"n":"By Your Side","s":"Album Tracks","d":[],"p":[]},{"n":"Chance the Rapper - Better Move","s":"Album Tracks","d":[],"p":[]},{"n":"Man Of God","s":"Album Tracks","d":[],"p":[]},{"n":"Our King","s":"Album Tracks","d":[],"p":[]},{"n":"Soldier","s":"Album Tracks","d":[],"p":[]},{"n":"South Florida","s":"Album Tracks","d":[],"p":[]},{"n":"Spiritual Vibrations","s":"Album Tracks","d":[],"p":[]},{"n":"Want You","s":"Album Tracks","d":[],"p":[]}]},{"name":"DONDA [V1]","color":"#f83414","songs":[{"n":"DONDA","s":"Album Tracks","d":[],"p":[]},{"n":"I Feel Terrific","s":"Album Tracks","d":[],"p":[]},{"n":"Future Bounce","s":"Album Tracks","d":[],"p":[]},{"n":"Lord I Need You","s":"Album Tracks","d":[],"p":[]},{"n":"Keep My Spirit Alive","s":"Album Tracks","d":[],"p":[]},{"n":"Off The Grid","s":"Album Tracks","d":[],"p":[]},{"n":"Skuuurrruurrr","s":"Album Tracks","d":[],"p":[]},{"n":"In God's Country","s":"Album Tracks","d":[],"p":[]},{"n":"God's Country","s":"Album Tracks","d":[],"p":[]},{"n":"Welcome To My Life 156.35/156 D Major","s":"Album Tracks","d":[],"p":[]},{"n":"Up From The Ashes","s":"Album Tracks","d":[],"p":[]},{"n":"Tell The Vision","s":"Album Tracks","d":[],"p":[]},{"n":"Wash Us In The Blood","s":"Album Tracks","d":[],"p":[]},{"n":"Everything","s":"Album Tracks","d":[],"p":[]},{"n":"New Body","s":"Album Tracks","d":[],"p":[]},{"n":"Hold The Line","s":"Album Tracks","d":[],"p":[]},{"n":"Praise God","s":"Album Tracks","d":[],"p":[]},{"n":"Life Of The Party","s":"Album Tracks","d":[],"p":[]},{"n":"Misc","s":"Album Tracks","d":[],"p":[]},{"n":"By Your Side","s":"Album Tracks","d":[],"p":[]},{"n":"Change My State Of Mind","s":"Album Tracks","d":[],"p":[]},{"n":"City of Lost Angels","s":"Album Tracks","d":[],"p":[]},{"n":"Crash Landing","s":"Album Tracks","d":[],"p":[]},{"n":"Codeine","s":"Album Tracks","d":[],"p":[]},{"n":"Daniel Is Troubled","s":"Album Tracks","d":[],"p":[]},{"n":"Karate Kid","s":"Album Tracks","d":[],"p":[]},{"n":"Heaven And Earth","s":"Album Tracks","d":[],"p":[]},{"n":"I Know God Breathed On This","s":"Album Tracks","d":[],"p":[]},{"n":"Made It","s":"Album Tracks","d":[],"p":[]},{"n":"Nah Nah Nah","s":"Album Tracks","d":[],"p":[]},{"n":"Precious","s":"Album Tracks","d":[],"p":[]},{"n":"Satan","s":"Album Tracks","d":[],"p":[]},{"n":"Stand United","s":"Album Tracks","d":[],"p":[]},{"n":"South Florida","s":"Album Tracks","d":[],"p":[]},{"n":"Video Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"This Is God's Test","s":"Album Tracks","d":[],"p":[]},{"n":"What Has America Done 4 Me","s":"Album Tracks","d":[],"p":[]},{"n":"You Was Right","s":"Album Tracks","d":[],"p":[]},{"n":"Visitation Rights","s":"Album Tracks","d":[],"p":[]},{"n":"Ant Clemons - Amazing","s":"Album Tracks","d":[],"p":[]},{"n":"19/11/20 Ojivolta Freestyles","s":"Album Tracks","d":[],"p":[]},{"n":"Ye 02-02 & Ye","s":"Album Tracks","d":[],"p":[]},{"n":"Db Major/Ab","s":"Album Tracks","d":[],"p":[]},{"n":"F# Minor/D","s":"Album Tracks","d":[],"p":[]},{"n":"G Major/C#","s":"Album Tracks","d":[],"p":[]},{"n":"Ye","s":"Album Tracks","d":[],"p":[]},{"n":"F# Minor/A","s":"Album Tracks","d":[],"p":[]},{"n":"A Minor/B","s":"Album Tracks","d":[],"p":[]},{"n":"F Minor/E","s":"Album Tracks","d":[],"p":[]},{"n":"E Minor/F","s":"Album Tracks","d":[],"p":[]},{"n":"C# Minor/B","s":"Album Tracks","d":[],"p":[]},{"n":"Reference Tracks","s":"Album Tracks","d":[],"p":[]},{"n":"KayCyy - Breathe","s":"Album Tracks","d":[],"p":[]},{"n":"KayCyy - No Luck","s":"Album Tracks","d":[],"p":[]},{"n":"Palm Springs","s":"Album Tracks","d":[],"p":[]},{"n":"12,000 Acres [Victory Boyd Ref]","s":"Album Tracks","d":[],"p":[]},{"n":"In Jesus Name","s":"Album Tracks","d":[],"p":[]},{"n":"Eb Minor/D","s":"Features","d":[],"p":[]},{"n":"SAINt JHN - Smack DVD","s":"Features","d":[],"p":[]},{"n":"2 Chainz - Feel A Way","s":"Features","d":[],"p":[]},{"n":"SAINt JHN - Pray 4 Me","s":"Features","d":[],"p":[]},{"n":"Ty Dolla Sign - Ego Death","s":"Features","d":[],"p":[]},{"n":"Ty Dolla $ign - Track","s":"Features","d":[],"p":[]}]},{"name":"Donda [V2]","color":"#39b3c5","songs":[{"n":"Cuban Links -- G Minor","s":"Album Tracks","d":[],"p":[]},{"n":"Duran Duran","s":"Album Tracks","d":[],"p":[]},{"n":"High Step","s":"Album Tracks","d":[],"p":[]},{"n":"Intimacy -- F# Major","s":"Album Tracks","d":[],"p":[]},{"n":"La Llave -- Bb Minor","s":"Album Tracks","d":[],"p":[]},{"n":"Love Attacks","s":"Album Tracks","d":[],"p":[]},{"n":"Red Dead Range","s":"Album Tracks","d":[],"p":[]},{"n":"May Dem Songs","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Go Away F# Minor/G","s":"Album Tracks","d":[],"p":[]},{"n":"Go Left","s":"Album Tracks","d":[],"p":[]},{"n":"Goin 2 Jail","s":"Album Tracks","d":[],"p":[]},{"n":"Find Out","s":"Album Tracks","d":[],"p":[]},{"n":"HIII WYD","s":"Album Tracks","d":[],"p":[]},{"n":"Hype","s":"Album Tracks","d":[],"p":[]},{"n":"Livin It Up","s":"Album Tracks","d":[],"p":[]},{"n":"NASDAQ","s":"Album Tracks","d":[],"p":[]},{"n":"Run It Up","s":"Album Tracks","d":[],"p":[]},{"n":"Soul De La","s":"Album Tracks","d":[],"p":[]},{"n":"Thunder","s":"Album Tracks","d":[],"p":[]},{"n":"Top","s":"Album Tracks","d":[],"p":[]},{"n":"210510 Session","s":"Album Tracks","d":[],"p":[]},{"n":"Back Then","s":"Album Tracks","d":[],"p":[]},{"n":"Different Codes","s":"Album Tracks","d":[],"p":[]},{"n":"Friends List","s":"Album Tracks","d":[],"p":[]},{"n":"Keep Em In Check","s":"Album Tracks","d":[],"p":[]},{"n":"Aboriginal","s":"Album Tracks","d":[],"p":[]},{"n":"Dangerous Liaison 91 --","s":"Album Tracks","d":[],"p":[]},{"n":"Pick A Side","s":"Album Tracks","d":[],"p":[]},{"n":"Really Fun Mistakes","s":"Album Tracks","d":[],"p":[]},{"n":"210521 Session","s":"Album Tracks","d":[],"p":[]},{"n":"ATC Raw Materials 148 --","s":"Album Tracks","d":[],"p":[]},{"n":"Benetic Hylola","s":"Album Tracks","d":[],"p":[]},{"n":"Cracked Dancefloor 166 --","s":"Album Tracks","d":[],"p":[]},{"n":"Curify Scrupul","s":"Album Tracks","d":[],"p":[]},{"n":"Proximius Nonded Comp 87 --","s":"Album Tracks","d":[],"p":[]},{"n":"literally a 4 bar","s":"Album Tracks","d":[],"p":[]},{"n":"Scolona Mispute 71 --","s":"Album Tracks","d":[],"p":[]},{"n":"Scolona Mispute","s":"Album Tracks","d":[],"p":[]},{"n":"Travigable Subrepel","s":"Album Tracks","d":[],"p":[]},{"n":"Vax","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]},{"n":"Holy Ghost","s":"Album Tracks","d":[],"p":[]},{"n":"Tell My Story","s":"Album Tracks","d":[],"p":[]},{"n":"Take Your Time","s":"Album Tracks","d":[],"p":[]},{"n":"210525 Session","s":"Album Tracks","d":[],"p":[]},{"n":"Boogz 2 --","s":"Album Tracks","d":[],"p":[]},{"n":"Pat Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"Digital Nas Songs","s":"Album Tracks","d":[],"p":[]},{"n":"All These Friends Of Mine","s":"Album Tracks","d":[],"p":[]},{"n":"DIE","s":"Album Tracks","d":[],"p":[]},{"n":"Eternal","s":"Album Tracks","d":[],"p":[]},{"n":"Godspeed","s":"Album Tracks","d":[],"p":[]},{"n":"Human Kind","s":"Album Tracks","d":[],"p":[]},{"n":"Insane","s":"Album Tracks","d":[],"p":[]},{"n":"Let's Go","s":"Album Tracks","d":[],"p":[]},{"n":"Let Me Know","s":"Album Tracks","d":[],"p":[]},{"n":"Smooth","s":"Album Tracks","d":[],"p":[]},{"n":"MerryGoRound","s":"Album Tracks","d":[],"p":[]},{"n":"Grinder","s":"Album Tracks","d":[],"p":[]},{"n":"Leave","s":"Album Tracks","d":[],"p":[]},{"n":"Let Go","s":"Album Tracks","d":[],"p":[]},{"n":"Nigga","s":"Album Tracks","d":[],"p":[]},{"n":"Hard Rock","s":"Album Tracks","d":[],"p":[]},{"n":"Ops Block","s":"Album Tracks","d":[],"p":[]},{"n":"What a Dream","s":"Album Tracks","d":[],"p":[]},{"n":"GI Joe","s":"Album Tracks","d":[],"p":[]},{"n":"Wait","s":"Album Tracks","d":[],"p":[]},{"n":"Grammy","s":"Album Tracks","d":[],"p":[]},{"n":"Greatest","s":"Album Tracks","d":[],"p":[]},{"n":"New Hunnids","s":"Album Tracks","d":[],"p":[]},{"n":"Nowhere","s":"Album Tracks","d":[],"p":[]},{"n":"Ninja","s":"Album Tracks","d":[],"p":[]},{"n":"Urgent SS","s":"Album Tracks","d":[],"p":[]},{"n":"Swole","s":"Album Tracks","d":[],"p":[]},{"n":"Misc/Others","s":"Album Tracks","d":[],"p":[]},{"n":"I'm Here For It","s":"Album Tracks","d":[],"p":[]},{"n":"Book Jungle","s":"Album Tracks","d":[],"p":[]},{"n":"Christ Is My Friend","s":"Album Tracks","d":[],"p":[]},{"n":"City Of Lost Angels TR Ref","s":"Album Tracks","d":[],"p":[]},{"n":"God Got Me","s":"Album Tracks","d":[],"p":[]},{"n":"Heaven and Hell","s":"Album Tracks","d":[],"p":[]},{"n":"Hovercraft [V3] 107 --","s":"Album Tracks","d":[],"p":[]},{"n":"He Gave It All","s":"Album Tracks","d":[],"p":[]},{"n":"Life of the Party (V6)","s":"Album Tracks","d":[],"p":[]},{"n":"Petals 89 --","s":"Album Tracks","d":[],"p":[]},{"n":"Pray And Leave It There","s":"Album Tracks","d":[],"p":[]},{"n":"South Carolina 83 --","s":"Album Tracks","d":[],"p":[]},{"n":"To The Roof","s":"Album Tracks","d":[],"p":[]},{"n":"YE FREESTYLE","s":"Album Tracks","d":[],"p":[]},{"n":"Travis Scott - Delresto","s":"Album Tracks","d":[],"p":[]}]},{"name":"Donda [V3]","color":"#3968c5","songs":[{"n":"Jail","s":"Album Tracks","d":[],"p":[]},{"n":"God Breathed","s":"Album Tracks","d":[],"p":[]},{"n":"Off The Grid","s":"Album Tracks","d":[],"p":[]},{"n":"Hurricane","s":"Album Tracks","d":[],"p":[]},{"n":"Praise God","s":"Album Tracks","d":[],"p":[]},{"n":"Jonah","s":"Album Tracks","d":[],"p":[]},{"n":"Ok Ok","s":"Album Tracks","d":[],"p":[]},{"n":"Junya","s":"Album Tracks","d":[],"p":[]},{"n":"Believe What I Say","s":"Album Tracks","d":[],"p":[]},{"n":"Remote Control","s":"Album Tracks","d":[],"p":[]},{"n":"Moon","s":"Album Tracks","d":[],"p":[]},{"n":"Heaven and Hell","s":"Album Tracks","d":[],"p":[]},{"n":"Donda","s":"Album Tracks","d":[],"p":[]},{"n":"Keep My Spirit Alive","s":"Album Tracks","d":[],"p":[]},{"n":"Jesus Lord","s":"Album Tracks","d":[],"p":[]},{"n":"New Again","s":"Album Tracks","d":[],"p":[]},{"n":"Tell The Vision","s":"Album Tracks","d":[],"p":[]},{"n":"Lord I Need You","s":"Album Tracks","d":[],"p":[]},{"n":"Pure Souls","s":"Album Tracks","d":[],"p":[]},{"n":"Come To Life 127.1/127 Eb Major","s":"Album Tracks","d":[],"p":[]},{"n":"No Child Left Behind","s":"Album Tracks","d":[],"p":[]},{"n":"Deluxe Songs","s":"Album Tracks","d":[],"p":[]},{"n":"Life Of The Party","s":"Album Tracks","d":[],"p":[]},{"n":"Up From The Ashes","s":"Album Tracks","d":[],"p":[]},{"n":"Never Abandon Your Family","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"Daylight (Leak)","s":"Album Tracks","d":[],"p":[]},{"n":"Daylight (Vegas Version)","s":"Album Tracks","d":[],"p":[]},{"n":"FUNNY","s":"Album Tracks","d":[],"p":[]},{"n":"Lose My Shit","s":"Album Tracks","d":[],"p":[]},{"n":"Where Do We Go?","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]}]},{"name":"Donda 2","color":"#71718d","songs":[{"n":"TRUE LOVE","s":"Album Tracks","d":[],"p":[]},{"n":"BROKEN ROAD","s":"Album Tracks","d":[],"p":[]},{"n":"GET LOST","s":"Album Tracks","d":[],"p":[]},{"n":"KEEP THE FLOWERS","s":"Album Tracks","d":[],"p":[]},{"n":"JESSE","s":"Album Tracks","d":[],"p":[]},{"n":"TOO EASY","s":"Album Tracks","d":[],"p":[]},{"n":"PABLO","s":"Album Tracks","d":[],"p":[]},{"n":"MR MIYAGI","s":"Album Tracks","d":[],"p":[]},{"n":"HAPPY","s":"Album Tracks","d":[],"p":[]},{"n":"SECURITY","s":"Album Tracks","d":[],"p":[]},{"n":"CITY OF GODS","s":"Album Tracks","d":[],"p":[]},{"n":"CITY OF CHI","s":"Album Tracks","d":[],"p":[]},{"n":"SCI-FI","s":"Album Tracks","d":[],"p":[]},{"n":"SUZY","s":"Album Tracks","d":[],"p":[]},{"n":"BURN EVERYTHING","s":"Album Tracks","d":[],"p":[]},{"n":"LOUIE BAGS","s":"Album Tracks","d":[],"p":[]},{"n":"WE DID IT","s":"Album Tracks","d":[],"p":[]},{"n":"MAINTENANCE","s":"Album Tracks","d":[],"p":[]},{"n":"LORD LIFT ME UP","s":"Album Tracks","d":[],"p":[]},{"n":"FIRST TIME IN A LONG TIME","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"SELFISH","s":"Album Tracks","d":[],"p":[]},{"n":"KEEP IT BURNIN","s":"Album Tracks","d":[],"p":[]},{"n":"WORST MISTAKE","s":"Album Tracks","d":[],"p":[]},{"n":"NEVER FORGIVE YOURSELF / YEAH I E Minor / Bb","s":"Album Tracks","d":[],"p":[]},{"n":"FOR THE CHILDREN","s":"Album Tracks","d":[],"p":[]},{"n":"NEBRASKA","s":"Album Tracks","d":[],"p":[]},{"n":"BEAUTIFUL LIFE","s":"Album Tracks","d":[],"p":[]},{"n":"STOP LOOKING FOR THIS","s":"Album Tracks","d":[],"p":[]},{"n":"DEPRESSION","s":"Album Tracks","d":[],"p":[]},{"n":"PARALLELS","s":"Album Tracks","d":[],"p":[]},{"n":"FIGHTER","s":"Album Tracks","d":[],"p":[]},{"n":"HAPPY BIRTHDAY","s":"Album Tracks","d":[],"p":[]},{"n":"THANKS FOR THE PAIN Bb Minor / B","s":"Album Tracks","d":[],"p":[]},{"n":"THE END OF TIME","s":"Album Tracks","d":[],"p":[]},{"n":"SYMPHONIC BLUES SUITE","s":"Album Tracks","d":[],"p":[]},{"n":"TSUNAMI","s":"Album Tracks","d":[],"p":[]},{"n":"References/Insts/Alt. Productions","s":"Album Tracks","d":[],"p":[]},{"n":"WE DID IT KID (AyoAA Ver)","s":"Album Tracks","d":[],"p":[]},{"n":"CELEBRATE MY WIN","s":"Album Tracks","d":[],"p":[]},{"n":"CHURCH","s":"Album Tracks","d":[],"p":[]},{"n":"CLOSED FOR BUSINESS","s":"Album Tracks","d":[],"p":[]},{"n":"GOD PUT ME THERE","s":"Album Tracks","d":[],"p":[]},{"n":"GOD'S YOUR AUDIENCE","s":"Album Tracks","d":[],"p":[]},{"n":"FREE HOOVER","s":"Album Tracks","d":[],"p":[]},{"n":"EVANGELICA","s":"Album Tracks","d":[],"p":[]},{"n":"SLUM VILLAGE","s":"Album Tracks","d":[],"p":[]},{"n":"SMASHED ON","s":"Album Tracks","d":[],"p":[]},{"n":"LIFESIZE","s":"Album Tracks","d":[],"p":[]},{"n":"LEVELING UP","s":"Album Tracks","d":[],"p":[]},{"n":"HANDS","s":"Album Tracks","d":[],"p":[]},{"n":"HOW COULD U","s":"Album Tracks","d":[],"p":[]},{"n":"DONDA PRAYER","s":"Album Tracks","d":[],"p":[]},{"n":"WHEN I'M LEAVING","s":"Album Tracks","d":[],"p":[]},{"n":"Lil Durk - Petty Too","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - Drop A Bag","s":"Album Tracks","d":[],"p":[]},{"n":"Jack Harlow - Lil Secret","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"The Game - Eazy","s":"Album Tracks","d":[],"p":[]},{"n":"Abstract Mindstate - The Brenda Song","s":"Album Tracks","d":[],"p":[]},{"n":"Cardi B - Hot Shit","s":"Album Tracks","d":[],"p":[]},{"n":"Pusha T - Dreaming of the Past","s":"Album Tracks","d":[],"p":[]},{"n":"Pusha T - Rock N Roll","s":"Album Tracks","d":[],"p":[]},{"n":"Rich The Kid - Plain Jane","s":"Album Tracks","d":[],"p":[]},{"n":"The Game - Fortunate","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Khaled - Losing Control","s":"Album Tracks","d":[],"p":[]},{"n":"DJ Khaled - THEY SO MAD","s":"Album Tracks","d":[],"p":[]}]},{"name":"WAR","color":"#e84040","songs":[{"n":"For Once In My Life","s":"Album Tracks","d":[],"p":[]},{"n":"What I Would Have Said At Virgil's Funeral","s":"Album Tracks","d":[],"p":[]},{"n":"Talking","s":"Album Tracks","d":[],"p":[]},{"n":"Hold Up, Get Up","s":"Album Tracks","d":[],"p":[]},{"n":"Quiet","s":"Album Tracks","d":[],"p":[]},{"n":"Bobby Digital","s":"Album Tracks","d":[],"p":[]},{"n":"All In Love","s":"Album Tracks","d":[],"p":[]},{"n":"Through The High Wire","s":"Album Tracks","d":[],"p":[]},{"n":"And They Came Back / This One Here","s":"Album Tracks","d":[],"p":[]},{"n":"Misc.","s":"Album Tracks","d":[],"p":[]},{"n":"Can You Feel It","s":"Album Tracks","d":[],"p":[]},{"n":"Chingy","s":"Album Tracks","d":[],"p":[]},{"n":"Church Girl","s":"Album Tracks","d":[],"p":[]},{"n":"Let It In","s":"Album Tracks","d":[],"p":[]},{"n":"Magic","s":"Album Tracks","d":[],"p":[]},{"n":"Nothing To Fear","s":"Album Tracks","d":[],"p":[]},{"n":"Rest Of Your Life","s":"Album Tracks","d":[],"p":[]},{"n":"Spiky","s":"Album Tracks","d":[],"p":[]},{"n":"Traveler","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]}]},{"name":"YEBU","color":"#4179c7","songs":[{"n":"SO SOON","s":"Album Tracks","d":[],"p":[]},{"n":"UNLOCK","s":"Album Tracks","d":[],"p":[]},{"n":"HAPPY","s":"Album Tracks","d":[],"p":[]},{"n":"CEREMONY FREESTYLE","s":"Album Tracks","d":[],"p":[]},{"n":"HOODRAT","s":"Album Tracks","d":[],"p":[]},{"n":"PAPERWORK","s":"Album Tracks","d":[],"p":[]},{"n":"STREET LIGHTS","s":"Album Tracks","d":[],"p":[]},{"n":"LOVE LOVE LOVE","s":"Album Tracks","d":[],"p":[]},{"n":"ALL IN LOVE","s":"Album Tracks","d":[],"p":[]},{"n":"BOBBY DIGITAL","s":"Album Tracks","d":[],"p":[]},{"n":"MATTHEW","s":"Album Tracks","d":[],"p":[]},{"n":"BIG BOODY / RIVER Eb Major / Db","s":"Album Tracks","d":[],"p":[]},{"n":"Misc/Others","s":"Album Tracks","d":[],"p":[]},{"n":"Benz Freestyle","s":"Album Tracks","d":[],"p":[]},{"n":"My God","s":"Album Tracks","d":[],"p":[]},{"n":"Not Inclusive","s":"Album Tracks","d":[],"p":[]},{"n":"Someday We'll All Be Free","s":"Album Tracks","d":[],"p":[]},{"n":"Ticket To Heaven","s":"Album Tracks","d":[],"p":[]},{"n":"Wolverine","s":"Album Tracks","d":[],"p":[]},{"n":"Worship (OG)","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]},{"n":"CyHi - Lucifer","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Albe Back - Concussion","s":"Album Tracks","d":[],"p":[]},{"n":"Albe Back - Israel","s":"Album Tracks","d":[],"p":[]},{"n":"French Montana - Stand United","s":"Album Tracks","d":[],"p":[]},{"n":"French Montana - Where They At","s":"Album Tracks","d":[],"p":[]},{"n":"Slidin' (OG)","s":"Album Tracks","d":[],"p":[]},{"n":"Up In The Stars","s":"Album Tracks","d":[],"p":[]},{"n":"New Body","s":"Album Tracks","d":[],"p":[]},{"n":"Fuk Sumn (OG)","s":"Album Tracks","d":[],"p":[]},{"n":"Paid (OG)","s":"Album Tracks","d":[],"p":[]},{"n":"Paperwork","s":"Album Tracks","d":[],"p":[]},{"n":"Burn","s":"Album Tracks","d":[],"p":[]},{"n":"Aperol Spritz","s":"Album Tracks","d":[],"p":[]},{"n":"Love Me The Most","s":"Album Tracks","d":[],"p":[]},{"n":"Back 2 Me","s":"Album Tracks","d":[],"p":[]},{"n":"Time Moving Slow (OG)","s":"Album Tracks","d":[],"p":[]},{"n":"Worship","s":"Album Tracks","d":[],"p":[]},{"n":"Eb Major / C","s":"Album Tracks","d":[],"p":[]},{"n":"River Eb Major / Db","s":"Album Tracks","d":[],"p":[]},{"n":"So Good","s":"Album Tracks","d":[],"p":[]},{"n":"Matthew","s":"Album Tracks","d":[],"p":[]},{"n":"So Called Friends","s":"Album Tracks","d":[],"p":[]},{"n":"Love Again","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"Ain't Got No","s":"Album Tracks","d":[],"p":[]},{"n":"Amazing","s":"Album Tracks","d":[],"p":[]},{"n":"A Thousand Times","s":"Album Tracks","d":[],"p":[]},{"n":"Bad Bitch Playbook","s":"Album Tracks","d":[],"p":[]},{"n":"Back N That (Imagine That)","s":"Album Tracks","d":[],"p":[]},{"n":"Don't Kill The Party","s":"Album Tracks","d":[],"p":[]},{"n":"Easy Come Easy Go","s":"Album Tracks","d":[],"p":[]},{"n":"Forever","s":"Album Tracks","d":[],"p":[]},{"n":"For Sure","s":"Album Tracks","d":[],"p":[]},{"n":"Flows Of A Ghost","s":"Album Tracks","d":[],"p":[]},{"n":"Fuck Flowers","s":"Album Tracks","d":[],"p":[]},{"n":"Future $ound$","s":"Album Tracks","d":[],"p":[]},{"n":"Gothic","s":"Album Tracks","d":[],"p":[]},{"n":"Holy Mountain","s":"Album Tracks","d":[],"p":[]},{"n":"I Forget To Breathe","s":"Album Tracks","d":[],"p":[]},{"n":"In The Rain","s":"Album Tracks","d":[],"p":[]},{"n":"Lights On","s":"Album Tracks","d":[],"p":[]},{"n":"Medium Hard","s":"Album Tracks","d":[],"p":[]},{"n":"Nice To Meet You","s":"Album Tracks","d":[],"p":[]},{"n":"Nowhere To Go","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 Peace and Quiet","s":"Album Tracks","d":[],"p":[]},{"n":"Pray","s":"Album Tracks","d":[],"p":[]},{"n":"Real Haters","s":"Album Tracks","d":[],"p":[]},{"n":"The Cross","s":"Album Tracks","d":[],"p":[]},{"n":"Unlock","s":"Album Tracks","d":[],"p":[]},{"n":"We Love You","s":"Album Tracks","d":[],"p":[]}]},{"name":"VULTURES 1","color":"#c56b39","songs":[{"n":"STARS","s":"Album Tracks","d":[],"p":[]},{"n":"KEYS TO MY LIFE D Minor/F#","s":"Album Tracks","d":[],"p":[]},{"n":"PAID","s":"Album Tracks","d":[],"p":[]},{"n":"TALKING / ONCE AGAIN F Major / E","s":"Album Tracks","d":[],"p":[]},{"n":"BACK TO ME","s":"Album Tracks","d":[],"p":[]},{"n":"HOODRAT","s":"Album Tracks","d":[],"p":[]},{"n":"DO IT","s":"Album Tracks","d":[],"p":[]},{"n":"PAPERWORK","s":"Album Tracks","d":[],"p":[]},{"n":"BURN","s":"Album Tracks","d":[],"p":[]},{"n":"FUK SUMN","s":"Album Tracks","d":[],"p":[]},{"n":"VULTURES","s":"Album Tracks","d":[],"p":[]},{"n":"CARNIVAL","s":"Album Tracks","d":[],"p":[]},{"n":"BEG FORGIVENESS","s":"Album Tracks","d":[],"p":[]},{"n":"GOOD (DON'T DIE)","s":"Album Tracks","d":[],"p":[]},{"n":"PROBLEMATIC","s":"Album Tracks","d":[],"p":[]},{"n":"KING","s":"Album Tracks","d":[],"p":[]},{"n":"Planned Track","s":"Album Tracks","d":[],"p":[]},{"n":"EVERYBODY","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"A Thousand","s":"Album Tracks","d":[],"p":[]},{"n":"DRUNK","s":"Album Tracks","d":[],"p":[]},{"n":"BLOCK THE PAIN AWAY","s":"Album Tracks","d":[],"p":[]},{"n":"LOVE LOVE LOVE","s":"Album Tracks","d":[],"p":[]},{"n":"WHAT AM I MISSING","s":"Album Tracks","d":[],"p":[]},{"n":"Instrumentals","s":"Album Tracks","d":[],"p":[]},{"n":"OHCHA","s":"Album Tracks","d":[],"p":[]},{"n":"MY GUT","s":"Album Tracks","d":[],"p":[]},{"n":"WOLVES CRY","s":"Album Tracks","d":[],"p":[]},{"n":"ZERO","s":"Album Tracks","d":[],"p":[]},{"n":"Features/Production","s":"Album Tracks","d":[],"p":[]},{"n":"Playboi Carti -","s":"Album Tracks","d":[],"p":[]}]},{"name":"VULTURES 2","color":"#728c72","songs":[{"n":"SLIDE","s":"Album Tracks","d":[],"p":[]},{"n":"TIME MOVING SLOW","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 FIELD TRIP","s":"Album Tracks","d":[],"p":[]},{"n":"FRIED","s":"Album Tracks","d":[],"p":[]},{"n":"ISABELLA","s":"Album Tracks","d":[],"p":[]},{"n":"PROMOTION","s":"Album Tracks","d":[],"p":[]},{"n":"LIFESTYLE","s":"Album Tracks","d":[],"p":[]},{"n":"HUSBAND","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 FOREVER","s":"Album Tracks","d":[],"p":[]},{"n":"RIVER Eb Major / Db","s":"Album Tracks","d":[],"p":[]},{"n":"FOREVER ROLLING","s":"Album Tracks","d":[],"p":[]},{"n":"BOMB","s":"Album Tracks","d":[],"p":[]},{"n":"DEAD","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 SKY CITY","s":"Album Tracks","d":[],"p":[]},{"n":"MY SOUL","s":"Album Tracks","d":[],"p":[]},{"n":"Deluxe Songs","s":"Album Tracks","d":[],"p":[]},{"n":"TAKE OFF YOUR DRESS","s":"Album Tracks","d":[],"p":[]},{"n":"BELIEVER","s":"Album Tracks","d":[],"p":[]},{"n":"DRUNK","s":"Album Tracks","d":[],"p":[]},{"n":"GUN TO MY HEAD","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 CAN U BE","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"FORTUNE AND FAME","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 PUSSY COST MONEY","s":"Album Tracks","d":[],"p":[]},{"n":"IMAGINE DAT","s":"Album Tracks","d":[],"p":[]},{"n":"MELROSE","s":"Album Tracks","d":[],"p":[]},{"n":"NEXT TIME","s":"Album Tracks","d":[],"p":[]},{"n":"NIGHTS ON THE MOON","s":"Album Tracks","d":[],"p":[]},{"n":"PAY PER VIEW","s":"Album Tracks","d":[],"p":[]},{"n":"VAGABOND","s":"Album Tracks","d":[],"p":[]},{"n":"YE ABOUT MINE","s":"Album Tracks","d":[],"p":[]},{"n":"LET GO","s":"Album Tracks","d":[],"p":[]},{"n":"AFTER LYFE","s":"Album Tracks","d":[],"p":[]},{"n":"THIRSTY","s":"Album Tracks","d":[],"p":[]},{"n":"FEAR","s":"Album Tracks","d":[],"p":[]},{"n":"RAVE","s":"Album Tracks","d":[],"p":[]},{"n":"???","s":"Album Tracks","d":[],"p":[]},{"n":"Features","s":"Album Tracks","d":[],"p":[]},{"n":"Future & Metro Boomin - LIKE THAT (Remix)","s":"Album Tracks","d":[],"p":[]},{"n":"Rich The Kid - Gimme A Second","s":"Album Tracks","d":[],"p":[]},{"n":"Stem Edits","s":"Album Tracks","d":[],"p":[]}]},{"name":"VULTURES 3","color":"#10c8ee","songs":[{"n":"A THOUSAND MILES","s":"Album Tracks","d":[],"p":[]},{"n":"DON'T KILL THE PARTY","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 FREAK","s":"Album Tracks","d":[],"p":[]},{"n":"MELROSE","s":"Album Tracks","d":[],"p":[]},{"n":"NEW BODY","s":"Album Tracks","d":[],"p":[]},{"n":"NEVER CAN SAY GOODBYE","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 PUSSY COST MONEY","s":"Album Tracks","d":[],"p":[]},{"n":"Features/Production","s":"Album Tracks","d":[],"p":[]},{"n":"Ty Dolla $ign - Wheels Fall Off","s":"Album Tracks","d":[],"p":[]},{"n":"Playboi Carti - BACKD00R","s":"Album Tracks","d":[],"p":[]},{"n":"Playboi Carti - FOMDJ","s":"Album Tracks","d":[],"p":[]},{"n":"Playboi Carti - WE NEED ALL DA VIBES","s":"Album Tracks","d":[],"p":[]}]},{"name":"IN A PERFECT WORLD","color":"#6f8a8f","songs":[{"n":"ALIVE","s":"Album Tracks","d":[],"p":[]},{"n":"ALL IN LOVE","s":"Album Tracks","d":[],"p":[]},{"n":"ALL THE LOVE","s":"Album Tracks","d":[],"p":[]},{"n":"BULLETPROOF","s":"Album Tracks","d":[],"p":[]},{"n":"MISSION CONTROL","s":"Album Tracks","d":[],"p":[]},{"n":"SISTERS & BROTHERS","s":"Album Tracks","d":[],"p":[]},{"n":"WHAT HAPPENED TO US","s":"Album Tracks","d":[],"p":[]},{"n":"YOU WILL","s":"Album Tracks","d":[],"p":[]},{"n":"References","s":"Album Tracks","d":[],"p":[]},{"n":"JESUS","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 HOSTAGES","s":"Album Tracks","d":[],"p":[]},{"n":"MIRRORS","s":"Album Tracks","d":[],"p":[]},{"n":"PERFECT WORLD","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 SUNDAY","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 WISH","s":"Album Tracks","d":[],"p":[]},{"n":"OLYVENS Beats","s":"Album Tracks","d":[],"p":[]},{"n":"LIGHTS","s":"Album Tracks","d":[],"p":[]},{"n":"MAKE THEM SEE","s":"Album Tracks","d":[],"p":[]},{"n":"SOLITUDE","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 WEDDINGS","s":"Album Tracks","d":[],"p":[]},{"n":"Features/Production","s":"Album Tracks","d":[],"p":[]},{"n":"Chief Keef & Mustard - Shake Dat","s":"Album Tracks","d":[],"p":[]},{"n":"Freddie Gibbs & The Alchemist - A","s":"Album Tracks","d":[],"p":[]},{"n":"Ty Dolla $ign - DON'T KILL THE PARTY","s":"Album Tracks","d":[],"p":[]},{"n":"Ty Dolla $ign & Wax Motif - DON'T KILL THE","s":"Album Tracks","d":[],"p":[]},{"n":"Ty Dolla $ign - DON'T KILL THE PARTY -","s":"Album Tracks","d":[],"p":[]},{"n":"Ty Dolla $ign & Toney Handsome - DON'T","s":"Album Tracks","d":[],"p":[]}]},{"name":"BULLY","color":"#8c7272","songs":[{"n":"KING","s":"Album Tracks","d":[],"p":[]},{"n":"THIS A MUST","s":"Album Tracks","d":[],"p":[]},{"n":"FATHER","s":"Album Tracks","d":[],"p":[]},{"n":"ALL THE LOVE","s":"Album Tracks","d":[],"p":[]},{"n":"PUNCH DRUNK","s":"Album Tracks","d":[],"p":[]},{"n":"WHATEVER WORKS","s":"Album Tracks","d":[],"p":[]},{"n":"MAMA'S FAVORITE","s":"Album Tracks","d":[],"p":[]},{"n":"SISTERS AND BROTHERS","s":"Album Tracks","d":[],"p":[]},{"n":"BULLY","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 HIGHS AND LOWS","s":"Album Tracks","d":[],"p":[]},{"n":"I CAN'T WAIT","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 WHITE LINES","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 CIRCLES","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 PREACHER MAN","s":"Album Tracks","d":[],"p":[]},{"n":"BEAUTY AND THE BEAST 163.5 D Mixolydian","s":"Album Tracks","d":[],"p":[]},{"n":"DAMN","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 LAST BREATH","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 THIS ONE HERE","s":"Album Tracks","d":[],"p":[]},{"n":"Deluxe Tracks","s":"Album Tracks","d":[],"p":[]},{"n":"OK","s":"Album Tracks","d":[],"p":[]},{"n":"MISSION CONTROL","s":"Album Tracks","d":[],"p":[]},{"n":"Misc.","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 LOSING YOUR MIND","s":"Album Tracks","d":[],"p":[]},{"n":"GEMINI SEASON","s":"Album Tracks","d":[],"p":[]},{"n":"Leaks","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 ???","s":"Album Tracks","d":[],"p":[]},{"n":"BAD GUY","s":"Album Tracks","d":[],"p":[]},{"n":"BLIND FOR IT","s":"Album Tracks","d":[],"p":[]},{"n":"BULLY (OG CHOP)","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 DARK MATTER","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 MELROSE","s":"Album Tracks","d":[],"p":[]},{"n":"RED EYE","s":"Album Tracks","d":[],"p":[]},{"n":"THIS ONE HERE","s":"Album Tracks","d":[],"p":[]},{"n":"Features/Production","s":"Album Tracks","d":[],"p":[]},{"n":"4batz - act iii: on god (she like) - Remix","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 Skepta - Alpha Omega","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - Come With Me","s":"Album Tracks","d":[],"p":[]},{"n":"Consequence - No Apologies","s":"Album Tracks","d":[],"p":[]},{"n":"Cordae - No Bad News","s":"Album Tracks","d":[],"p":[]},{"n":"Digital Nas - bLCK hedi SliManE","s":"Album Tracks","d":[],"p":[]},{"n":"French Montana - Unlocked","s":"Album Tracks","d":[],"p":[]},{"n":"Ghostface Killah - No Face","s":"Album Tracks","d":[],"p":[]},{"n":"Hass - GOD'S IN CONTROL","s":"Album Tracks","d":[],"p":[]},{"n":"King Combs - PEOPLE LIKE ME","s":"Album Tracks","d":[],"p":[]},{"n":"\ud83e\udd16 Childish Gambino - Say Less","s":"Album Tracks","d":[],"p":[]},{"n":"The Game - 40 Nights","s":"Album Tracks","d":[],"p":[]},{"n":"The Game - Free Suge","s":"Album Tracks","d":[],"p":[]},{"n":"The Game - Tina","s":"Album Tracks","d":[],"p":[]}]}]}
+</script>
+<script id="CD" type="application/json">
+{"eras":[{"name":"Before The College Dropout","color":"#f82f06","r":[],"p":[],"w":[],"x":[]},{"name":"The College Dropout","color":"#e22628","r":[],"p":[],"w":[],"x":[]},{"name":"Late Registration","color":"#eb2613","r":[],"p":[],"w":[],"x":[]},{"name":"Late Orchestration","color":"#8a8a95","r":[],"p":[],"w":[],"x":[]},{"name":"Graduation","color":"#a05ed0","r":[],"p":[],"w":[],"x":[]},{"name":"808s & Heartbreak","color":"#9caeac","r":[],"p":[],"w":[],"x":[]},{"name":"Child Rebel Soldier","color":"#8a8a95","r":[],"p":[],"w":[],"x":[]},{"name":"Good Ass Job","color":"#9d06f8","r":[],"p":[],"w":[],"x":[]},{"name":"My Beautiful Dark Twisted Fantasy","color":"#ed1132","r":[],"p":[],"w":[],"x":[]},{"name":"Watch The Throne","color":"#c58739","r":[],"p":[],"w":[],"x":[]},{"name":"Cruel Summer","color":"#917878","r":[],"p":[],"w":[],"x":[]},{"name":"Thank God For Drugs","color":"#8a8a95","r":[],"p":[],"w":[],"x":[]},{"name":"Yeezus","color":"#ae9c9c","r":[],"p":[],"w":[],"x":[]},{"name":"Cruel Winter [V1]","color":"#8c7272","r":[],"p":[],"w":[],"x":[]},{"name":"Yeezus 2","color":"#8d8271","r":[],"p":[],"w":[],"x":[]},{"name":"So Help Me God","color":"#7e6e67","r":[],"p":[],"w":[],"x":[]},{"name":"SWISH","color":"#fa5f5f","r":[],"p":[],"w":[],"x":[]},{"name":"808s & Heartbreak: Live At The Hollywood Bowl","color":"#8a8a95","r":[],"p":[],"w":[],"x":[]},{"name":"The Life Of Pablo","color":"#fa8850","r":[],"p":[],"w":[],"x":[]},{"name":"Cruel Winter [V2]","color":"#f2b868","r":[],"p":[],"w":[],"x":[]},{"name":"TurboGrafx16","color":"#6956ce","r":[],"p":[],"w":[],"x":[]},{"name":"Wolves","color":"#06f899","r":[],"p":[],"w":[],"x":[]},{"name":"LOVE EVERYONE","color":"#80c0da","r":[],"p":[],"w":[],"x":[]},{"name":"ye","color":"#3284cc","r":[],"p":[],"w":[],"x":[]},{"name":"KIDS SEE GHOSTS","color":"#0681f8","r":[],"p":[],"w":[],"x":[]},{"name":"Good Ass Job (2018)","color":"#ed2ad0","r":[],"p":[],"w":[],"x":[]},{"name":"Yandhi [V1]","color":"#8e5ffa","r":[],"p":[],"w":[],"x":[]},{"name":"Yandhi [V2]","color":"#de207e","r":[],"p":[],"w":[],"x":[]},{"name":"JESUS IS KING","color":"#0f32ef","r":[],"p":[],"w":[],"x":[]},{"name":"JESUS IS KING: The Dr. Dre Version","color":"#8a8a95","r":[],"p":[],"w":[],"x":[]},{"name":"God's Country","color":"#2929d5","r":[],"p":[],"w":[],"x":[]},{"name":"DONDA [V1]","color":"#f83414","r":[],"p":[],"w":[],"x":[]},{"name":"Donda [V2]","color":"#39b3c5","r":[],"p":[],"w":[],"x":[]},{"name":"Donda [V3]","color":"#3968c5","r":[],"p":[],"w":[],"x":[]},{"name":"Donda 2","color":"#71718d","r":[],"p":[],"w":[],"x":[]},{"name":"WAR","color":"#e84040","r":[],"p":[],"w":[],"x":[]},{"name":"YEBU","color":"#4179c7","r":[],"p":[],"w":[],"x":[]},{"name":"Bad Bitch Playbook","color":"#8a8a95","r":[],"p":[],"w":[],"x":[]},{"name":"VULTURES","color":"#8a8a95","r":[],"p":[],"w":[],"x":[]},{"name":"VULTURES 1","color":"#c56b39","r":[],"p":[],"w":[],"x":[]},{"name":"VULTURES 2","color":"#728c72","r":[],"p":[],"w":[],"x":[]},{"name":"BULLY","color":"#8c7272","r":[],"p":[],"w":[],"x":[]},{"name":"Live","color":"#8a8a95","r":[],"p":[],"w":[],"x":[]},{"name":"Other","color":"#8a8a95","r":[],"p":[],"w":[],"x":[]}]}
+</script>
+<script>
+
+/* ══════════════════════════════════════════════════════════
+   GOOGLE SHEET FEEDS — edit these two lines to point elsewhere
+   ══════════════════════════════════════════════════════════ */
+var SHEET_EDITS = 'https://docs.google.com/spreadsheets/d/1J83vvogabRvZtP48De4uTHqXQeNQKQqfKdMkfCN_Ivk/gviz/tq?tqx=out:csv&headers=1&gid=1171110052';
+var SHEET_COMPS = 'https://docs.google.com/spreadsheets/d/1J83vvogabRvZtP48De4uTHqXQeNQKQqfKdMkfCN_Ivk/gviz/tq?tqx=out:csv&headers=1&gid=1693937245';
+
+var DATA  = JSON.parse(document.getElementById('D').textContent);
+var CDATA = JSON.parse(document.getElementById('CD').textContent);
+var ERAS  = DATA.eras;
+var CERAS = CDATA.eras;
+
+/* ── state ── */
+var view='tracker', curEra=null, curSong=null, curTab='d';
+var fType={}, fFlag={}, q='', eq='';
+var mgEra=null, mgTab='r', mgSel=null, mgQ='', mgView='list';
+var lbMode='edits', BOARD=null, CBOARD=null;
+
+/* ── helpers ── */
+function el(i){return document.getElementById(i);}
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function initials(s){if(!s)return'?';var p=s.replace(/[^A-Za-z0-9 ]/g,'').split(/\s+/).filter(Boolean);
+  return (p.length>1?(p[0][0]+p[1][0]):s.slice(0,2)).toUpperCase();}
+function slugify(s){return String(s||'').toLowerCase().replace(/&/g,'and')
+  .replace(/[\u2019'".,()\[\]]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function typeColor(t){return {'Overhaul':'#f23f43','Renovation':'#f0883e','Vanilla-Style':'#23a55a',
+  'Extension':'#00a8fc','Remix':'#c07ef5'}[t]||'#4e5058';}
+function catSlug(x){return String(x||'').replace(/\s+/g,'-');}
+function truthy(v){return /^(y|yes|true|1|x|\u2713|\u2b50)$/i.test(String(v||'').trim());}
+function normStatus(s){
+  s=String(s||'').toLowerCase().trim();
+  if(/cancel/.test(s))return'cancelled';
+  if(/wip|progress|upcoming|unreleas/.test(s))return'wip';
+  if(/releas/.test(s))return'released';
+  return '';
+}
+var AV=['#f23f43','#f0883e','#23a55a','#00a8fc','#c07ef5','#f0b132','#e93d82','#12a594','#5865f2','#c76a15'];
+function avColor(s){var h=0;for(var i=0;i<String(s).length;i++)h=(h*31+String(s).charCodeAt(i))&0x7fffffff;
+  return AV[h%AV.length];}
+function countEdits(s){return s.d.length+s.p.length;}
+var _tt;
+function toast(m,e2){var t=el('toast');t.textContent=m;t.className=e2?'err':'';t.style.display='block';
+  clearTimeout(_tt);_tt=setTimeout(function(){t.style.display='none';},2600);}
+
+/* ── CSV ── */
+function parseCSV(text){
+  var rows=[],row=[],f='',qq=false,i=0;
+  text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  while(i<text.length){var ch=text[i];
+    if(qq){ if(ch==='"'){ if(text[i+1]==='"'){f+='"';i+=2;continue;} qq=false;i++;continue;} f+=ch;i++;continue;}
+    if(ch==='"'){qq=true;i++;continue;}
+    if(ch===','){row.push(f);f='';i++;continue;}
+    if(ch==='\n'){row.push(f);rows.push(row);row=[];f='';i++;continue;}
+    f+=ch;i++;}
+  if(f.length||row.length){row.push(f);rows.push(row);}
+  return rows.filter(function(r){return r.some(function(x){return String(x).trim()!=='';});});
+}
+function csvObjects(t){
+  var rows=parseCSV(t); if(rows.length<2)return[];
+  var h=rows[0].map(function(x){return String(x).trim().toLowerCase();});
+  return rows.slice(1).map(function(r){var o={};h.forEach(function(k,i){o[k]=(r[i]==null?'':String(r[i]).trim());});return o;});
+}
+
+/* ── apply sheet ── */
+function applyEdits(objs){
+  var by={}; ERAS.forEach(function(e){e.songs.forEach(function(s){s.d=[];s.p=[];});by[e.name.toLowerCase()]=e;});
+  var n=0;
+  objs.forEach(function(o){
+    var era=by[String(o.era||'').toLowerCase()]; if(!era)return;
+    var sn=String(o.song||'').trim(); if(!sn)return;
+    var song=era.songs.filter(function(s){return s.n.toLowerCase()===sn.toLowerCase();})[0];
+    if(!song){song={n:sn,s:o.section||'Album Tracks',d:[],p:[]};era.songs.push(song);}
+    var spec=/^s/i.test(o.tab||'');
+    var ob={title:o.title||sn,creator:o.creator||'unknown',type:o.type||'Renovation',
+      note:o.description||'',url:o.url||null,alt:o.alt||null,hl:truthy(o.highlight),
+      comp:o.comp||'',single:truthy(o.single),status:normStatus(o.status),out:truthy(o.outdated),
+      era:era.name,song:song.n};
+    if(spec){ob.g=(o.grade||'B').toUpperCase().charAt(0);song.p.push(ob);}
+    else{ob.rank=parseInt(o.rank,10)||0;song.d.push(ob);}
+    n++;
+  });
+  ERAS.forEach(function(e){e.songs.forEach(function(s){
+    var auto=0;
+    s.d.forEach(function(x){if(!x.rank){auto++;x.rank=auto;}else{auto=Math.max(auto,x.rank);}});
+    s.d.sort(function(a,b){return a.rank-b.rank;});
+  });});
+  BOARD=null; return n;
+}
+function applyComps(objs){
+  var by={}; CERAS.forEach(function(e){e.r=[];e.p=[];e.w=[];e.x=[];by[e.name.toLowerCase()]=e;});
+  var n=0;
+  objs.forEach(function(o){
+    var key=String(o.era||'').toLowerCase(); if(!key)return;
+    var era=by[key];
+    if(!era){era={name:o.era,color:'#8a8a95',r:[],p:[],w:[],x:[]};CERAS.push(era);by[key]=era;}
+    var tab=String(o.tab||'ranked').toLowerCase();
+    var st=normStatus(o.status);
+    var ob={name:o.name||'',creator:o.creator||'unknown',cat:o.category||'Renovations',
+      desc:o.description||'',url:o.url||null,
+      labels:(o.hosts||'').split(',').map(function(s){return s.trim();}).filter(Boolean),
+      review:o.review||null,hl:truthy(o.highlight),status:st,out:truthy(o.outdated),
+      singles:(o.singles||'').split(',').map(function(s){return s.trim();}).filter(Boolean),
+      era:era.name};
+    if(st==='cancelled'||/cancel/.test(tab)){ob.tabk='x';era.x.push(ob);}
+    else if(st==='wip'||/wip|upcoming/.test(tab)){ob.tabk='w';era.w.push(ob);}
+    else if(/^s/i.test(tab)){ob.tabk='p';ob.g=(o.grade||'B').toUpperCase().charAt(0);era.p.push(ob);}
+    else{ob.tabk='r';ob.rank=parseInt(o.rank,10)||0;era.r.push(ob);}
+    n++;
+  });
+  CERAS.forEach(function(e){
+    var auto=0;
+    e.r.forEach(function(x){if(!x.rank){auto++;x.rank=auto;}else{auto=Math.max(auto,x.rank);}});
+    e.r.sort(function(a,b){return a.rank-b.rank;});
+  });
+  CBOARD=null; return n;
+}
+
+/* ── sync ── */
+var lastSheetMsg='Live from Google Sheets', lastSheetState='';
+function setSheetBar(state,msg){
+  lastSheetState=state||''; lastSheetMsg=msg;
+  var b=el('sb-edits'); if(!b)return;
+  b.className='sheetbar'+(state?' '+state:'');
+  b.querySelector('.msg').innerHTML=msg;
+  var m=el('mg-sheetmsg'); if(m){m.parentNode.className='sheetbar'+(state?' '+state:'');m.innerHTML=msg;}
+}
+function runSync(loud){
+  setSheetBar('busy','Loading from Google Sheets\u2026');
+  var counts={edits:null,comps:null};
+  var jobs=[];
+  if(SHEET_EDITS) jobs.push(fetch(SHEET_EDITS,{cache:'no-store'}).then(function(r){
+    if(!r.ok)throw new Error('edits '+r.status);return r.text();})
+    .then(function(t){counts.edits=applyEdits(csvObjects(t));}));
+  if(SHEET_COMPS) jobs.push(fetch(SHEET_COMPS,{cache:'no-store'}).then(function(r){
+    if(!r.ok)throw new Error('comps '+r.status);return r.text();})
+    .then(function(t){counts.comps=applyComps(csvObjects(t));}));
+  if(!jobs.length){setSheetBar('err','No sheet configured');return;}
+  return Promise.all(jobs).then(function(){
+    BOARD=null;CBOARD=null;
+    /* fixed order regardless of which fetch resolved first: comps, then edits, then time */
+    var parts=[];
+    if(counts.comps!=null) parts.push(counts.comps+' comps');
+    if(counts.edits!=null) parts.push(counts.edits+' edits');
+    setSheetBar('','Live from Google Sheets \u00b7 '+parts.join(' \u00b7 ')+
+      ' \u00b7 '+new Date().toLocaleTimeString());
+    drawEras();
+    if(view==='board')drawBoard(); else if(view==='comps')drawMega(); else draw();
+    if(loud)toast('Synced from Google Sheets');
+  }).catch(function(e2){
+    setSheetBar('err','Sheet load failed \u2014 '+esc(e2.message)+'. Showing what loaded.');
+    if(loud)toast('Sheet load failed',true);
+  });
+}
+
+/* ══════ SIDEBAR ══════ */
+function drawEras(){
+  var L=el('era-list'); L.innerHTML='';
+  var list=eq?ERAS.filter(function(e){return e.name.toLowerCase().indexOf(eq)>=0;}):ERAS;
+  if(!eq){
+    var l1=document.createElement('div');l1.className='sec-lbl';l1.textContent='Library';L.appendChild(l1);
+    var all=document.createElement('div');
+    all.className='era'+(curEra===null?' on':'');
+    all.innerHTML='<span class="era-nm">all-songs</span><span class="era-bar" style="background:#949ba4"></span>'+
+      '<span class="era-ct">'+ERAS.reduce(function(a,e){return a+e.songs.length;},0)+'</span>';
+    all.onclick=function(){curEra=null;curSong=null;closeNav();drawEras();draw();};
+    L.appendChild(all);
+    var l2=document.createElement('div');l2.className='sec-lbl';l2.textContent='Eras \u2014 '+ERAS.length;L.appendChild(l2);
+  }
+  list.forEach(function(e){
+    var d=document.createElement('div');
+    d.className='era'+(curEra===e.name?' on':'');
+    d.innerHTML='<span class="era-nm">'+esc(slugify(e.name))+'</span>'+
+      '<span class="era-bar" style="background:'+e.color+'"></span>'+
+      '<span class="era-ct">'+e.songs.length+'</span>';
+    d.onclick=function(){curEra=e.name;curSong=null;closeNav();drawEras();draw();};
+    L.appendChild(d);
+  });
+}
+
+/* ══════ FILTERING ══════ */
+function edMatches(x){
+  var types=Object.keys(fType).filter(function(k){return fType[k];});
+  if(types.length&&types.indexOf(x.type)<0)return false;
+  if(fFlag.hl&&!x.hl)return false;
+  if(fFlag.incomp&&!x.comp)return false;
+  if(fFlag.nocomp&&x.comp)return false;
+  if(fFlag.single&&!x.single)return false;
+  if(fFlag.outdated&&!x.out)return false;
+  if(fFlag.released&&x.status!=='released')return false;
+  if(fFlag.wip&&x.status!=='wip')return false;
+  if(fFlag.cancelled&&x.status!=='cancelled')return false;
+  return true;
+}
+function anyFilter(){
+  return Object.keys(fType).some(function(k){return fType[k];})||
+         Object.keys(fFlag).some(function(k){return fFlag[k];});
+}
+function rows(){
+  var out=[];
+  ERAS.forEach(function(e){
+    if(curEra&&e.name!==curEra)return;
+    e.songs.forEach(function(s){out.push({e:e,s:s});});
+  });
+  if(anyFilter()) out=out.filter(function(r){return r.s.d.concat(r.s.p).some(edMatches);});
+  return out;
+}
+
+/* ══════ SEARCH (grouped) ══════ */
+function searchAll(k){
+  k=k.toLowerCase();
+  var scope=curEra;  /* when inside an era folder, every category stays scoped to it */
+  var songs=[],edits=[],editors={};
+  /* comps are intentionally excluded from the Edits-tab search —
+     the Comps page has its own dedicated search for that */
+  ERAS.forEach(function(e){
+    if(scope && e.name!==scope) return;
+    e.songs.forEach(function(s){
+      if(s.n.toLowerCase().indexOf(k)>=0) songs.push({e:e,s:s});
+      s.d.concat(s.p).forEach(function(x){
+        var hit=(x.title&&x.title.toLowerCase().indexOf(k)>=0)||
+                (x.note&&x.note.toLowerCase().indexOf(k)>=0)||
+                (x.comp&&x.comp.toLowerCase().indexOf(k)>=0);
+        if(hit&&edMatches(x)) edits.push({e:e,s:s,x:x});
+        if(x.creator&&x.creator.toLowerCase().indexOf(k)>=0){
+          x.creator.split(/\s*(?:,|&|\+|\/| and | x | with )\s*/i).forEach(function(nm){
+            nm=nm.trim(); if(nm&&nm.toLowerCase().indexOf(k)>=0) editors[nm]=(editors[nm]||0)+1;});
+        }
+      });
+    });
+  });
+  return {songs:songs,edits:edits,comps:[],scoped:!!scope,
+    editors:Object.keys(editors).map(function(n){return {name:n,n:editors[n]};})
+      .sort(function(a,b){return b.n-a.n;})};
+}
+
+function statusChip(st){
+  if(!st)return'';
+  var lbl={released:'Released',wip:'WIP',cancelled:'Cancelled'}[st]||st;
+  return '<span class="chip st-'+st+'">'+lbl+'</span>';
+}
+
+function drawSearch(){
+  var r=searchAll(q), B=el('body'), h='';
+  var total=r.songs.length+r.edits.length+r.editors.length;
+  el('top-ct').textContent=total.toLocaleString()+' results'+(r.scoped?' in '+curEra:'');
+  if(!total){
+    B.innerHTML='<div class="none">NO RESULTS<small>Nothing matches &ldquo;'+esc(q)+'&rdquo;'+
+      (r.scoped?' in '+esc(curEra)+'. <a href="javascript:void(0)" id="sr-unscope" style="color:var(--bl)">Search everywhere</a>':'')+
+      '</small></div>';
+    var us=el('sr-unscope'); if(us) us.onclick=function(){curEra=null;drawEras();draw();};
+    return;
+  }
+  if(r.scoped) h+='<div class="sr-h" style="padding-top:16px"><span>Scoped to '+esc(curEra)+'</span>'+
+    '<span class="ln"></span><a href="javascript:void(0)" id="sr-unscope2" style="color:var(--bl);font-size:11px;font-weight:600;flex-shrink:0">Search all eras</a></div>';
+
+  function head(t,n){return '<div class="sr-h"><span>'+t+'</span><span class="n">'+n+'</span><div class="ln"></div></div>';}
+
+  if(r.songs.length){
+    h+=head('Songs',r.songs.length);
+    h+=r.songs.slice(0,40).map(function(o,i){
+      return '<div class="sr" data-song="'+i+'">'+
+        '<div class="sr-i" style="background:'+o.e.color+'">'+esc(initials(o.s.n))+'</div>'+
+        '<div class="sr-b"><div class="sr-t">'+esc(o.s.n)+'</div>'+
+        '<div class="sr-s">'+esc(o.e.name)+' &middot; '+esc(o.s.s)+'</div></div>'+
+        '<div class="sr-r"><span class="tally">'+countEdits(o.s)+' edits</span></div></div>';
+    }).join('');
+  }
+  if(r.edits.length){
+    h+=head('Edits',r.edits.length);
+    h+=r.edits.slice(0,60).map(function(o,i){
+      return '<div class="sr" data-edit="'+i+'">'+
+        '<div class="sr-i" style="background:'+typeColor(o.x.type)+'">'+esc(initials(o.x.creator))+'</div>'+
+        '<div class="sr-b"><div class="sr-t">'+esc(o.x.title)+
+          (o.x.hl?'<span class="chip hl">&#9733;</span>':'')+
+          (o.x.out?'<span class="chip out">Outdated</span>':'')+'</div>'+
+        '<div class="sr-s">'+esc(o.x.creator)+' &middot; '+esc(o.s.n)+' &middot; '+esc(o.e.name)+'</div></div>'+
+        '<div class="sr-r"><span class="tt '+o.x.type+'">'+esc(o.x.type)+'</span></div></div>';
+    }).join('');
+  }
+  /* comps intentionally not shown in Edits-tab search results */
+  if(r.editors.length){
+    h+=head('Editors',r.editors.length);
+    h+=r.editors.slice(0,25).map(function(o,i){
+      return '<div class="sr" data-editor="'+i+'">'+
+        '<div class="sr-i" style="background:'+avColor(o.name)+'">'+esc(initials(o.name))+'</div>'+
+        '<div class="sr-b"><div class="sr-t">'+esc(o.name)+'</div>'+
+        '<div class="sr-s">'+o.n+' edit'+(o.n===1?'':'s')+' on the tracker</div></div>'+
+        '<div class="sr-r"><span class="tally">view</span></div></div>';
+    }).join('');
+  }
+  B.innerHTML=h;
+  var us2=el('sr-unscope2'); if(us2) us2.onclick=function(){curEra=null;drawEras();draw();};
+  Array.prototype.forEach.call(B.querySelectorAll('[data-song]'),function(n){
+    n.onclick=function(){var o=r.songs[+n.getAttribute('data-song')];
+      curSong={era:o.e.name,color:o.e.color,s:o.s};curTab='d';draw();};});
+  Array.prototype.forEach.call(B.querySelectorAll('[data-edit]'),function(n){
+    n.onclick=function(){var o=r.edits[+n.getAttribute('data-edit')];
+      curSong={era:o.e.name,color:o.e.color,s:o.s};curTab=o.s.p.indexOf(o.x)>=0?'p':'d';draw();};});
+  Array.prototype.forEach.call(B.querySelectorAll('[data-editor]'),function(n){
+    n.onclick=function(){var o=r.editors[+n.getAttribute('data-editor')];
+      setView('board');el('sq').value=o.name;q=o.name;drawBoard();};});
+}
+
+/* ══════ TRACKER RENDER ══════ */
+function crumbs(){
+  var C=el('crumb');
+  if(view==='board'){C.innerHTML='<span class="cr now">leaderboard</span>';return;}
+  if(q){
+    C.innerHTML = curEra
+      ? '<span class="cr" data-go="root">all-songs</span><span class="cr-s">&rsaquo;</span>'+
+        '<span class="cr" data-go="era">'+esc(slugify(curEra))+'</span><span class="cr-s">&rsaquo;</span>'+
+        '<span class="cr now">search</span>'
+      : '<span class="cr now">search</span>';
+    Array.prototype.forEach.call(C.querySelectorAll('[data-go]'),function(n){
+      n.onclick=function(){var g=n.getAttribute('data-go');
+        if(g==='root'){curEra=null;curSong=null;}
+        if(g==='era'){curSong=null;}
+        drawEras();draw();};});
+    return;
+  }
+  if(curSong){
+    C.innerHTML='<span class="cr" data-go="root">all-songs</span><span class="cr-s">&rsaquo;</span>'+
+      '<span class="cr" data-go="era">'+esc(slugify(curSong.era))+'</span><span class="cr-s">&rsaquo;</span>'+
+      '<span class="cr now">'+esc(curSong.s.n)+'</span>';
+  } else if(curEra){
+    C.innerHTML='<span class="cr" data-go="root">all-songs</span><span class="cr-s">&rsaquo;</span>'+
+      '<span class="cr now">'+esc(slugify(curEra))+'</span>';
+  } else C.innerHTML='<span class="cr now">all-songs</span>';
+  Array.prototype.forEach.call(C.querySelectorAll('[data-go]'),function(n){
+    n.onclick=function(){var g=n.getAttribute('data-go');
+      if(g==='root'){curEra=null;curSong=null;}
+      if(g==='era'){curEra=curSong.era;curSong=null;}
+      drawEras();draw();};});
+}
+
+function draw(){
+  crumbs();
+  var B=el('body');
+  if(q){drawSearch();return;}
+  if(curSong){drawSong(B);return;}
+  var R=rows();
+  el('top-ct').textContent=R.length.toLocaleString()+' songs';
+  if(!R.length){B.innerHTML='<div class="none">NOTHING HERE<small>Try a different filter</small></div>';return;}
+  var frag=document.createDocumentFragment(),last=null;
+  R.forEach(function(r){
+    var key=r.e.name+' :: '+r.s.s;
+    if(key!==last){last=key;
+      var h=document.createElement('div');h.className='grp';
+      var lbl=curEra?r.s.s:r.e.name+'  \u00b7  '+r.s.s;
+      h.innerHTML='<div class="grp-l"></div><div class="grp-t">'+
+        '<span class="grp-d" style="background:'+r.e.color+'"></span>'+esc(lbl)+
+        '</div><div class="grp-l"></div>';
+      frag.appendChild(h);}
+    frag.appendChild(songRow(r));
+  });
+  B.innerHTML='';B.appendChild(frag);B.scrollTop=0;
+}
+
+function songRow(r){
+  var s=r.s,d=document.createElement('div');
+  d.className='song';d.style.setProperty('--sc',r.e.color);
+  var dots='';
+  for(var i=0;i<4;i++){var f=s.d[i];
+    dots+='<span class="dot"'+(f?' style="background:'+typeColor(f.type)+'"':'')+'></span>';}
+  var n=countEdits(s);
+  var flags='';
+  if(s.d.concat(s.p).some(function(x){return x.comp;})) flags+='<span class="chip comp">comp</span>';
+  if(s.d.concat(s.p).some(function(x){return x.out;})) flags+='<span class="chip out">outdated</span>';
+  d.innerHTML='<div class="song-i" style="background:'+r.e.color+'">'+esc(initials(s.n))+'</div>'+
+    '<div class="song-b"><div class="song-n"><b>'+esc(s.n)+'</b>'+flags+'</div>'+
+    '<div class="song-m">'+esc(r.e.name)+' &nbsp;&middot;&nbsp; '+esc(s.s)+'</div></div>'+
+    '<div class="song-r"><span class="dots">'+dots+'</span>'+
+    '<span class="tally">'+(n?n+' edit'+(n>1?'s':''):'&mdash;')+'</span></div>';
+  d.onclick=function(){curSong={era:r.e.name,color:r.e.color,s:s};curTab='d';draw();};
+  return d;
+}
+
+function drawSong(B){
+  var c=curSong,s=c.s;
+  el('top-ct').textContent=countEdits(s)+' edits';
+  var list=(curTab==='d'?s.d:s.p).filter(edMatches);
+  var cards='';
+  var shown=Math.max(list.length,4);
+  for(var i=0;i<shown;i++){
+    var e=list[i];
+    if(e){
+      var rk;
+      if(curTab==='d'){
+        var rv=e.rank||(i+1);
+        rk=rv<=3?'<div class="rank r'+rv+'">'+rv+'</div>'
+           :rv===4?'<div class="rank r4">4</div>'
+           :'<div class="rank hm" title="Honourable mention">HM</div>';
+      } else rk='<div class="rank">'+(e.g||'B')+'</div>';
+      var lk='';
+      if(e.url)lk+='<a class="dl" href="'+esc(e.url)+'" target="_blank" rel="noopener">DOWNLOAD</a>';
+      if(e.alt)lk+='<a class="dl sec" href="'+esc(e.alt)+'" target="_blank" rel="noopener">ALT</a>';
+      var meta='';
+      if(e.hl)meta+='<span class="chip hl">&#9733; Highlight</span>';
+      if(e.out)meta+='<span class="chip out">Outdated</span>';
+      if(e.comp)meta+='<span class="chip comp" data-gocomp="'+esc(e.comp)+'">'+
+        (e.single?'Single from ':'From ')+esc(e.comp)+'</span>';
+      if(e.single)meta+='<span class="chip single">Single</span>';
+      meta+=statusChip(e.status);
+      cards+='<div class="ed '+e.type+(e.out?' out':'')+'">'+rk+'<div class="ed-b">'+
+        '<div class="ed-t"><span class="ed-n">'+esc(e.title)+'</span>'+
+        '<span class="ed-c">'+esc(e.creator)+'</span></div>'+
+        (e.note?'<div class="ed-d">'+esc(e.note)+'</div>':'')+
+        '<div class="ed-f"><span class="tt '+e.type+'">'+esc(e.type)+'</span>'+meta+lk+'</div>'+
+        '</div></div>';
+    } else {
+      cards+='<div class="slot-empty"><div class="rank">'+
+        (curTab==='d'?(i+1):'\u2022')+'</div><span>'+
+        (curTab==='d'?'Slot '+(i+1)+' open':'Open slot')+'</span></div>';
+    }
+  }
+  var note=curTab==='d'
+    ? 'Ranked by placement. Ties are allowed \u2014 two edits can share a number. Past #4 counts as an HM.'
+    : 'Unranked. Graded A\u2013D on quality; several edits can share a grade.';
+  B.innerHTML='<div id="dt-head">'+
+    '<div id="dt-era" style="color:'+c.color+'"><span id="dt-era-d" style="background:'+c.color+'"></span>'+esc(c.era)+'</div>'+
+    '<div id="dt-name">'+esc(s.n)+'</div>'+
+    '<div id="dt-meta">'+esc(s.s)+' &middot; '+s.d.length+' ranked &middot; '+s.p.length+' special</div>'+
+    '<div id="dt-tabs">'+
+      '<div class="dtab'+(curTab==='d'?' on':'')+'" data-tab="d">Ranked <span class="dtab-n">'+s.d.length+'</span></div>'+
+      '<div class="dtab'+(curTab==='p'?' on':'')+'" data-tab="p">Special <span class="dtab-n">'+s.p.length+'</span></div>'+
+    '</div></div>'+
+    '<div id="dt-body"><div class="slot-note">'+note+'</div>'+cards+'</div>';
+  Array.prototype.forEach.call(B.querySelectorAll('.dtab'),function(t){
+    t.onclick=function(){curTab=t.getAttribute('data-tab');draw();};});
+  Array.prototype.forEach.call(B.querySelectorAll('[data-gocomp]'),function(t){
+    t.onclick=function(ev){ev.stopPropagation();gotoComp(t.getAttribute('data-gocomp'));};});
+  B.scrollTop=0;
+}
+
+/* jump from an edit to its comp */
+function gotoComp(name){
+  var k=String(name).toLowerCase();
+  for(var i=0;i<CERAS.length;i++){
+    var e=CERAS[i];
+    var all=e.r.concat(e.p,e.w,e.x);
+    for(var j=0;j<all.length;j++){
+      if(all[j].name.toLowerCase()===k){openComp(e.name,all[j]);return;}
+    }
+  }
+  toast('Comp "'+name+'" not found in the comps sheet',true);
+}
+function openComp(eraName,c){
+  setView('comps');mgEra=eraName;mgTab=c.tabk||'r';mgSel=c;mgQ='';
+  drawMega();openMgInfo(c);
+}
+/* jump from a comp/single to its edit */
+function gotoEdit(title){
+  var k=String(title).toLowerCase();
+  for(var i=0;i<ERAS.length;i++){
+    var e=ERAS[i];
+    for(var j=0;j<e.songs.length;j++){
+      var s=e.songs[j],all=s.d.concat(s.p);
+      for(var m=0;m<all.length;m++){
+        if(all[m].title.toLowerCase()===k){
+          setView('tracker');curEra=e.name;curSong={era:e.name,color:e.color,s:s};
+          curTab=s.p.indexOf(all[m])>=0?'p':'d';q='';el('sq').value='';
+          drawEras();draw();return;
+        }
+      }
+    }
+  }
+  toast('Edit "'+title+'" not found in the edits sheet',true);
+}
+
+/* ══════ COMPS (MEGA) ══════ */
+var FOLDER='<svg width="26" height="22" viewBox="0 0 26 22" fill="none">'+
+ '<path d="M0 3.5A2.5 2.5 0 012.5 1h7L12 3.5h11.5A2.5 2.5 0 0126 6v13a2.5 2.5 0 01-2.5 2.5h-21A2.5 2.5 0 010 19V3.5z" fill="#FFCC00"/>'+
+ '<path d="M0 6.5A2.5 2.5 0 012.5 4h21A2.5 2.5 0 0126 6.5V19a2.5 2.5 0 01-2.5 2.5h-21A2.5 2.5 0 010 19V6.5z" fill="#FFD633"/></svg>';
+var FILE='<svg width="24" height="26" viewBox="0 0 24 26" fill="none">'+
+ '<path d="M3 2.5A2.5 2.5 0 015.5 0H15l7 7v16.5a2.5 2.5 0 01-2.5 2.5h-14A2.5 2.5 0 013 23.5v-21z" fill="#4a4a4a"/>'+
+ '<path d="M15 0l7 7h-5a2 2 0 01-2-2V0z" fill="#6a6a6a"/>'+
+ '<rect x="6" y="12" width="12" height="1.6" rx=".8" fill="#8a8a8a"/>'+
+ '<rect x="6" y="16" width="9" height="1.6" rx=".8" fill="#8a8a8a"/></svg>';
+var MAG='<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+ '<circle cx="7" cy="7" r="5.2" stroke="#6f6f6f" stroke-width="1.6"/>'+
+ '<path d="M11 11l3.5 3.5" stroke="#6f6f6f" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+var TABKEY={r:'Ranked',p:'Special',w:'WIP / Upcoming',x:'Cancelled'};
+function mgFull(){var e=CERAS.filter(function(x){return x.name===mgEra;})[0];return e?(e[mgTab]||[]):[];}
+function mgMatch(c){
+  var types=Object.keys(fType).filter(function(k){return fType[k];});
+  if(types.length){
+    var map={'Overhaul':'Overhauls','Renovation':'Renovations','Vanilla-Style':'Vanilla-style',
+             'Extension':'Extensions','Remix':'Remixes'};
+    if(!types.some(function(t){return (map[t]||t)===c.cat;}))return false;
+  }
+  if(fFlag.hl&&!c.hl)return false;
+  if(fFlag.outdated&&!c.out)return false;
+  if(fFlag.released&&c.status!=='released')return false;
+  if(fFlag.wip&&c.status!=='wip')return false;
+  if(fFlag.cancelled&&c.status!=='cancelled')return false;
+  return true;
+}
+function mgList(){
+  var l=mgFull().filter(mgMatch);
+  if(mgQ){var k=mgQ.toLowerCase();
+    l=l.filter(function(x){return (x.name&&x.name.toLowerCase().indexOf(k)>=0)||
+      (x.creator&&x.creator.toLowerCase().indexOf(k)>=0)||(x.cat&&x.cat.toLowerCase().indexOf(k)>=0)||
+      (x.desc&&x.desc.toLowerCase().indexOf(k)>=0);});}
+  return l;
+}
+
+function drawMega(){
+  var root=!mgEra, era=mgEra?CERAS.filter(function(e){return e.name===mgEra;})[0]:null;
+  var crumb='<span class="mgc'+(root?' now':'')+'" id="mg-root">Comps</span>';
+  if(era)crumb+='<span class="mgc-s">&rsaquo;</span><span class="mgc now">'+esc(era.name)+'</span>';
+  var tabs='';
+  if(era){
+    tabs='<div id="mg-tabs">'+['r','p','w','x'].map(function(t){
+      return '<div class="mgtab'+(mgTab===t?' on':'')+'" data-mt="'+t+'">'+TABKEY[t]+
+        ' <span class="mgtab-n">'+(era[t]||[]).length+'</span></div>';}).join('')+
+      '<div id="mg-view"><button class="mgv'+(mgView==='list'?' on':'')+'" data-mv="list">&#9776;</button>'+
+      '<button class="mgv'+(mgView==='grid'?' on':'')+'" data-mv="grid">&#9638;</button></div></div>';
+  }
+  el('mg').innerHTML=
+    '<div id="mg-top"><div id="mg-logo">M</div>'+
+      '<div id="mg-search">'+MAG+'<input id="mg-q" placeholder="Search '+
+        (era?esc(era.name):'all comps')+'" autocomplete="off" spellcheck="false"></div>'+
+      '<div id="mg-av">Y</div></div>'+
+    '<div class="sheetbar '+esc(lastSheetState)+'" id="mg-sheetbar"><span class="dot"></span><span class="msg" id="mg-sheetmsg">'+esc(lastSheetMsg)+'</span>'+
+      '<button class="rfr" data-refresh>Refresh</button></div>'+
+    '<div id="mg-filters">'+
+      '<span class="mg-flbl">Type</span>'+
+      ['Overhaul','Renovation','Vanilla-Style','Extension','Remix'].map(function(t){
+        return '<span class="mgpill'+(fType[t]?' on':'')+'" data-t="'+t+'">'+t+'s</span>';}).join('')+
+      '<span class="mg-fdiv"></span>'+
+      '<span class="mgpill'+(fFlag.hl?' on':'')+'" data-f="hl">&#9733; Highlights</span>'+
+      '<span class="mg-fdiv"></span>'+
+      '<span class="mgpill'+(fFlag.released?' on':'')+'" data-f="released">Released</span>'+
+      '<span class="mgpill'+(fFlag.wip?' on':'')+'" data-f="wip">WIP</span>'+
+      '<span class="mgpill'+(fFlag.cancelled?' on':'')+'" data-f="cancelled">Cancelled</span>'+
+      '<span class="mgpill'+(fFlag.outdated?' on':'')+'" data-f="outdated">Outdated</span>'+
+      '<span class="mg-fdiv"></span>'+
+      '<span class="mgpill clear" id="clr-comps">Clear filters</span>'+
+    '</div>'+
+    '<div id="mg-crumb">'+crumb+'</div>'+tabs+
+    '<div id="mg-body" class="'+(mgView==='grid'&&era?'grid':'')+'" style="position:relative">'+
+      '<div class="mg-head"><div style="width:30px"></div><div class="mg-h-nm">Name</div>'+
+      '<div class="mg-h-cat">Category</div><div class="mg-h-by">Editor</div><div class="mg-h-src">Source</div></div>'+
+      '<div class="mg-rows"></div></div>'+
+    '<div id="mg-info"></div>';
+  drawMgRows();bindMega();
+  var qi=el('mg-q'); if(qi)qi.value=mgQ;
+}
+
+function drawMgRows(){
+  var host=el('mg').querySelector('.mg-rows'); if(!host)return;
+  var html;
+  if(!mgEra){
+    var k=mgQ?mgQ.toLowerCase():'';
+    var foldersHtml='', flatHtml='';
+
+    /* matching folders (always shown at root, filtered by name when searching) */
+    var eras=k?CERAS.filter(function(e){return e.name.toLowerCase().indexOf(k)>=0;}):CERAS;
+    foldersHtml=eras.map(function(e){
+      var n=e.r.length+e.p.length+e.w.length+e.x.length;
+      return '<div class="mgr" data-era="'+esc(e.name)+'">'+
+        '<div class="mg-ico">'+FOLDER+'</div>'+
+        '<div class="mg-nm"><div class="mg-nm-t">'+esc(e.name)+'</div>'+
+        '<div class="mg-nm-s">'+e.r.length+' ranked &middot; '+e.p.length+' special'+
+          (e.w.length?' &middot; '+e.w.length+' WIP':'')+(e.x.length?' &middot; '+e.x.length+' cancelled':'')+
+        '</div></div>'+
+        '<div class="mg-cat"><span class="mg-catpill" style="background:'+e.color+'22;color:'+e.color+'">Era</span></div>'+
+        '<div class="mg-by">'+n+' item'+(n===1?'':'s')+'</div>'+
+        '<div class="mg-src"><span class="mg-tag">Folder</span></div></div>';
+    }).join('');
+
+    /* flattened matching comps across every era, shown alongside the folders */
+    if(k){
+      var flat=[];
+      CERAS.forEach(function(e){
+        ['r','p','w','x'].forEach(function(tk){
+          (e[tk]||[]).forEach(function(x){
+            if((x.name&&x.name.toLowerCase().indexOf(k)>=0)||
+               (x.creator&&x.creator.toLowerCase().indexOf(k)>=0)||
+               (x.desc&&x.desc.toLowerCase().indexOf(k)>=0))
+              flat.push({e:e,x:x,tk:tk});
+          });
+        });
+      });
+      if(flat.length){
+        flatHtml='<div class="sr-h" style="padding-left:20px"><span>Comps</span>'+
+          '<span class="n">'+flat.length+'</span><span class="ln"></span></div>'+
+          flat.slice(0,60).map(function(o){
+            return '<div class="mgr" data-flat-era="'+esc(o.e.name)+'" data-flat-tab="'+o.tk+'" data-flat-idx="'+o.e[o.tk].indexOf(o.x)+'">'+
+              '<div class="mg-ico">'+FILE+'</div>'+
+              '<div class="mg-nm"><div class="mg-nm-t">'+esc(o.x.name)+
+                (o.x.hl?'<span class="mg-star">&#9733;</span>':'')+'</div>'+
+              '<div class="mg-nm-s">'+esc(o.e.name)+' \u00b7 '+esc(o.x.creator)+'</div></div>'+
+              '<div class="mg-cat"><span class="mg-catpill cat-'+catSlug(o.x.cat)+'">'+esc(o.x.cat)+'</span></div>'+
+              '<div class="mg-by">'+esc(o.x.creator)+'</div>'+
+              '<div class="mg-src">'+(o.x.status?'<span class="chip st-'+o.x.status+'">'+esc(o.x.status)+'</span>':'')+'</div></div>';
+          }).join('');
+      }
+    }
+
+    html=(foldersHtml||'<div class="mg-empty" style="justify-content:center">No eras match</div>')+flatHtml;
+    host.innerHTML=html;bindMgRows();return;
+  }
+  var list=mgList(),full=mgFull();
+  html=list.map(function(x){
+    var i=full.indexOf(x),badge='';
+    if(mgTab==='r'){var rv=x.rank||(i+1);
+      badge='<span class="mg-rank'+(rv<=3?' r'+rv:'')+'">'+(rv<=4?rv:'HM')+'</span>';}
+    else if(mgTab==='p')badge='<span class="mg-grade '+(x.g||'C')+'">'+(x.g||'C')+'</span>';
+    var tags=(x.labels||[]).slice(0,2).map(function(l){
+      return '<span class="mg-tag'+(/mega/i.test(l)?' mega':'')+'">'+esc(String(l).split(' ')[0])+'</span>';}).join('');
+    if(!tags&&x.url)tags='<span class="mg-tag mega">MEGA</span>';
+    return '<div class="mgr'+(mgSel===x?' sel':'')+(x.out?' out':'')+'" data-i="'+i+'">'+
+      '<div class="mg-ico">'+FILE+'</div>'+
+      '<div class="mg-nm"><div class="mg-nm-t">'+badge+esc(x.name)+
+        (x.hl?'<span class="mg-star">&#9733;</span>':'')+
+        (x.out?'<span class="chip out">Outdated</span>':'')+
+        ((x.singles&&x.singles.length)?'<span class="chip single">'+x.singles.length+' single'+(x.singles.length>1?'s':'')+'</span>':'')+
+      '</div><div class="mg-nm-s">'+esc(String(x.desc).slice(0,110))+(String(x.desc).length>110?'\u2026':'')+'</div></div>'+
+      '<div class="mg-cat"><span class="mg-catpill cat-'+catSlug(x.cat)+'">'+esc(x.cat)+'</span></div>'+
+      '<div class="mg-by">'+esc(x.creator)+'</div>'+
+      '<div class="mg-src">'+tags+'</div></div>';
+  }).join('');
+  if(!list.length)html='<div class="mg-empty" style="justify-content:center">Nothing in '+TABKEY[mgTab]+'</div>';
+  host.innerHTML=html;bindMgRows();
+}
+
+function bindMega(){
+  var r=el('mg-root'); if(r)r.onclick=function(){mgEra=null;mgSel=null;mgQ='';drawMega();};
+  Array.prototype.forEach.call(el('mg').querySelectorAll('[data-mt]'),function(n){
+    n.onclick=function(){mgTab=n.getAttribute('data-mt');mgSel=null;drawMega();};});
+  Array.prototype.forEach.call(el('mg').querySelectorAll('[data-mv]'),function(n){
+    n.onclick=function(){mgView=n.getAttribute('data-mv');drawMega();};});
+  var qi=el('mg-q'); if(qi)qi.oninput=function(){mgQ=this.value;drawMgRows();};
+  bindPills(el('mg-filters'),function(){mgSel=null;drawMega();});
+  var ccl=el('clr-comps'); if(ccl) ccl.onclick=function(){
+    fType={}; fFlag={}; mgSel=null; drawMega();
+  };
+  bindMgRows();
+}
+function bindMgRows(){
+  var sc=el('mg');
+  Array.prototype.forEach.call(sc.querySelectorAll('[data-era]'),function(n){
+    n.onclick=function(){mgEra=n.getAttribute('data-era');mgTab='r';mgSel=null;mgQ='';drawMega();};});
+  Array.prototype.forEach.call(sc.querySelectorAll('[data-flat-era]'),function(n){
+    n.onclick=function(){
+      var eraName=n.getAttribute('data-flat-era'), tk=n.getAttribute('data-flat-tab')||'r',
+          idx=+n.getAttribute('data-flat-idx');
+      var era=CERAS.filter(function(e){return e.name===eraName;})[0]; if(!era)return;
+      var match=(era[tk]||[])[idx]; if(!match)return;
+      mgEra=eraName; mgTab=tk; mgQ=''; mgSel=match;
+      drawMega();
+      setTimeout(function(){openMgInfo(match);},0);
+    };});
+  Array.prototype.forEach.call(sc.querySelectorAll('[data-i]'),function(n){
+    n.onclick=function(){var x=mgFull()[+n.getAttribute('data-i')];
+      mgSel=(mgSel===x)?null:x;drawMgRows();
+      if(mgSel)openMgInfo(mgSel);else el('mg-info').classList.remove('on');};});
+}
+
+function openMgInfo(x){
+  var pos=x.tabk==='r'?('Ranked #'+(x.rank||'?')):x.tabk==='p'?('Special \u2014 Grade '+(x.g||'C')):
+          x.tabk==='w'?'WIP / Upcoming':'Cancelled';
+  var links='';
+  if(x.url)links+='<a class="mgi-btn" href="'+esc(x.url)+'" target="_blank" rel="noopener">Download</a>';
+  if(x.review)links+='<a class="mgi-btn ghost" href="'+esc(x.review)+'" target="_blank" rel="noopener">Read review</a>';
+  if(!links)links='<div class="mgi-d" style="color:var(--mgt3)">No link available</div>';
+  var sing='';
+  if(x.singles&&x.singles.length){
+    sing='<div class="mgi-l">Singles</div>'+x.singles.map(function(s){
+      return '<div class="link-row" data-single="'+esc(s)+'"><span class="ic">&#9835;</span>'+
+        '<span class="nm">'+esc(s)+'</span><span>&rsaquo;</span></div>';}).join('');
+  }
+  el('mg-info').innerHTML='<div id="mgi-h"><div style="flex-shrink:0">'+FILE+'</div>'+
+    '<div style="flex:1;min-width:0"><div id="mgi-t">'+esc(x.name)+'</div>'+
+    '<div id="mgi-s">'+esc(pos)+'</div></div><button id="mgi-x">&times;</button></div>'+
+    '<div id="mgi-b"><div class="mgi-l">Actions</div>'+links+
+    '<div class="mgi-l">Details</div>'+
+    '<div class="mgi-row"><span>Era</span><span>'+esc(x.era||mgEra)+'</span></div>'+
+    '<div class="mgi-row"><span>Category</span><span>'+esc(x.cat)+'</span></div>'+
+    '<div class="mgi-row"><span>Editor</span><span>'+esc(x.creator)+'</span></div>'+
+    '<div class="mgi-row"><span>Position</span><span>'+esc(pos)+'</span></div>'+
+    (x.status?'<div class="mgi-row"><span>Status</span><span>'+esc(x.status)+'</span></div>':'')+
+    (x.out?'<div class="mgi-row"><span>Flag</span><span>Outdated</span></div>':'')+
+    (x.hl?'<div class="mgi-row"><span>Flag</span><span>&#9733; Highlight</span></div>':'')+
+    ((x.labels&&x.labels.length)?'<div class="mgi-row"><span>Hosts</span><span>'+esc(x.labels.join(', '))+'</span></div>':'')+
+    sing+
+    (x.desc?'<div class="mgi-l">Description</div><div class="mgi-d">'+esc(x.desc)+'</div>':'')+
+    '</div>';
+  el('mg-info').classList.add('on');
+  el('mgi-x').onclick=function(){el('mg-info').classList.remove('on');mgSel=null;drawMgRows();};
+  Array.prototype.forEach.call(el('mg-info').querySelectorAll('[data-single]'),function(n){
+    n.onclick=function(){gotoEdit(n.getAttribute('data-single'));};});
+}
+
+/* ══════ SHARED PILL BINDING (true multi-select, never radio) ══════ */
+function bindPills(container, cb){
+  if(!container) return;
+  Array.prototype.forEach.call(container.querySelectorAll('.pill[data-t],.pill[data-f],.mgpill[data-t],.mgpill[data-f]'), function(p){
+    p.onclick = function(){
+      var t=p.getAttribute('data-t'), f=p.getAttribute('data-f');
+      if(t){ fType[t]=!fType[t]; p.classList.toggle('on', !!fType[t]); }
+      else { fFlag[f]=!fFlag[f]; p.classList.toggle('on', !!fFlag[f]); }
+      if(cb) cb();
+    };
+  });
+}
+function clearAllFilters(){
+  fType={}; fFlag={};
+  Array.prototype.forEach.call(document.querySelectorAll('.pill.on,.mgpill.on'), function(p){p.classList.remove('on');});
+}
+
+/* ══════ VIEW SWITCHING (single sheetbar, no split rendering) ══════ */
+function setView(v){
+  view=v;
+  el('r-edits').classList.toggle('on', v==='tracker');
+  el('r-comps').classList.toggle('on', v==='comps');
+  el('r-board').classList.toggle('on', v==='board');
+
+  var isTracker=(v==='tracker');
+  el('side').style.display    = isTracker?'':'none';
+  el('filters').style.display = isTracker?'':'none';
+  el('body').style.display    = isTracker?'':'none';
+  el('lb').classList.toggle('on', v==='board');
+  el('mg').classList.toggle('on', v==='comps');
+
+  /* exactly one sheetbar on screen: the fixed one for tracker,
+     comps draws its own inside #mg-top (no fixed one needed there) */
+  el('sb-edits').style.display = isTracker ? 'flex' : 'none';
+
+  /* bottom search bar: used by tracker + leaderboard; comps has its own top search */
+  el('sbar').style.display = (v==='comps') ? 'none' : '';
+  el('sq').placeholder = v==='board'
+    ? 'Search editors\u2026'
+    : 'Search songs, edits, editors, comps\u2026';
+
+  closeNav();
+  if(v==='board') drawBoard();
+  else if(v==='comps') drawMega();
+  else { crumbs(); if(q) drawSearch(); else draw(); }
+}
+el('r-edits').onclick=function(){setView('tracker');};
+el('r-comps').onclick=function(){setView('comps');};
+el('r-board').onclick=function(){setView('board');};
+
+/* ══════ MOBILE NAV ══════ */
+function closeNav(){ document.body.classList.remove('nav'); }
+function openNav(){ document.body.classList.add('nav'); }
+el('burger').onclick=function(){ document.body.classList.toggle('nav'); };
+el('scrim').onclick=closeNav;
+
+/* ══════ LEADERBOARD ══════ */
+var RANK_PTS=[3,2,1,0.5], GRADE_PTS={A:3,B:2,C:1,D:0.5};
+var TY_ORDER=['Overhaul','Renovation','Vanilla-Style','Extension','Remix'];
+var TY_SHORT={'Overhaul':'OV','Renovation':'RN','Vanilla-Style':'VN','Extension':'EX','Remix':'RX'};
+function splitEditors(s){
+  if(!s) return ['unknown'];
+  var p=String(s).split(/\s*(?:,|&|\+|\/| and | x | with )\s*/i)
+    .map(function(x){return x.trim().replace(/^\(|\)$/g,'').trim();})
+    .filter(function(x){return x.length>0 && x.toLowerCase()!=='etc';});
+  return p.length?p:['unknown'];
+}
+function mapCatType(cat){
+  var m={'Overhauls':'Overhaul','Renovations':'Renovation','Vanilla-style':'Vanilla-Style',
+    'Extensions':'Extension','Remixes':'Remix'};
+  return m[cat]||null;
+}
+function newRow(nm){
+  return {name:nm,pts:0,edits:0,t1:0,t2:0,t3:0,t4:0,def:0,spc:0,hl:0,
+    ty:{'Overhaul':0,'Renovation':0,'Vanilla-Style':0,'Extension':0,'Remix':0}};
+}
+
+function buildBoard(){
+  var map={};
+  function bucket(nm){var k=nm.toLowerCase();if(!map[k])map[k]=newRow(nm);return map[k];}
+  ERAS.forEach(function(era){
+    era.songs.forEach(function(s){
+      var filled=new Set(); s.d.forEach(function(x){var rv=x.rank||1;if(rv<=4)filled.add(rv);});
+      var slotMult=Math.sqrt(Math.min(filled.size,4)/4);
+      s.d.forEach(function(x){
+        var rv=x.rank||1;
+        var base=rv===1?3:rv===2?2:rv===3?1:0.5;
+        var pts=base*slotMult*(x.hl?1.25:1);
+        var eds=splitEditors(x.creator); pts/=Math.sqrt(eds.length);
+        eds.forEach(function(nm){
+          var r=bucket(nm); r.pts+=pts; r.edits++; r.def++;
+          if(r.ty[x.type]!==undefined) r.ty[x.type]++;
+          if(x.hl) r.hl++;
+          if(rv===1) r.t1++; else if(rv===2) r.t2++; else if(rv===3) r.t3++; else r.t4++;
+        });
+      });
+      s.p.forEach(function(x){
+        var g=x.g||'D';
+        var pts=(GRADE_PTS[g]!==undefined?GRADE_PTS[g]:0.5)*(x.hl?1.25:1);
+        var eds=splitEditors(x.creator); pts/=Math.sqrt(eds.length);
+        eds.forEach(function(nm){
+          var r=bucket(nm); r.pts+=pts; r.edits++; r.spc++;
+          if(r.ty[x.type]!==undefined) r.ty[x.type]++;
+          if(x.hl) r.hl++;
+          if(g==='A') r.t1++; else if(g==='B') r.t2++; else if(g==='C') r.t3++; else r.t4++;
+        });
+      });
+    });
+  });
+  var arr=Object.keys(map).map(function(k){return map[k];})
+    .filter(function(r){return r.name.toLowerCase()!=='unknown';});
+  arr.sort(function(a,b){return b.pts-a.pts||b.t1-a.t1||a.name.localeCompare(b.name);});
+  return arr;
+}
+
+function buildCompBoard(){
+  var map={};
+  function bucket(nm){var k=nm.toLowerCase();if(!map[k])map[k]=newRow(nm);return map[k];}
+  CERAS.forEach(function(era){
+    var filled=new Set(); (era.r||[]).forEach(function(x){var rv=x.rank||1;if(rv<=4)filled.add(rv);});
+    var slotMult=Math.sqrt(Math.min(filled.size,4)/4);
+    (era.r||[]).forEach(function(x){
+      var rv=x.rank||1;
+      var base=rv===1?3:rv===2?2:rv===3?1:0.5;
+      var pts=base*slotMult*(x.hl?1.25:1);
+      var eds=splitEditors(x.creator); pts/=Math.sqrt(eds.length);
+      var mt=mapCatType(x.cat);
+      eds.forEach(function(nm){
+        var r=bucket(nm); r.pts+=pts; r.edits++; r.def++;
+        if(mt&&r.ty[mt]!==undefined) r.ty[mt]++;
+        if(x.hl) r.hl++;
+        if(rv===1) r.t1++; else if(rv===2) r.t2++; else if(rv===3) r.t3++; else r.t4++;
+      });
+    });
+    (era.p||[]).forEach(function(x){
+      var g=x.g||'D';
+      var pts=(GRADE_PTS[g]!==undefined?GRADE_PTS[g]:0.5)*(x.hl?1.25:1);
+      var eds=splitEditors(x.creator); pts/=Math.sqrt(eds.length);
+      var mt=mapCatType(x.cat);
+      eds.forEach(function(nm){
+        var r=bucket(nm); r.pts+=pts; r.edits++; r.spc++;
+        if(mt&&r.ty[mt]!==undefined) r.ty[mt]++;
+        if(x.hl) r.hl++;
+        if(g==='A') r.t1++; else if(g==='B') r.t2++; else if(g==='C') r.t3++; else r.t4++;
+      });
+    });
+    /* w (wip) and x (cancelled) intentionally excluded \u2014 no points */
+  });
+  var arr=Object.keys(map).map(function(k){return map[k];})
+    .filter(function(r){return r.name.toLowerCase()!=='unknown';});
+  arr.sort(function(a,b){return b.pts-a.pts||b.t1-a.t1||a.name.localeCompare(b.name);});
+  return arr;
+}
+
+function typeChips(ty){
+  return TY_ORDER.map(function(t){
+    var n=ty[t]||0;
+    return '<span class="tychip'+(n?'':' z')+'" title="'+t+'" style="'+(n?'color:'+typeColor(t):'')+'">'+
+      '<span class="sw" style="background:'+typeColor(t)+'"></span>'+
+      '<span style="font-size:8px;letter-spacing:.06em;color:'+(n?'#9c9c9c':'#4a4a4a')+'">'+TY_SHORT[t]+'</span>'+
+      '<span style="font-size:11px;color:'+(n?'#f0f0f0':'#3d3d3d')+'">'+n+'</span></span>';
+  }).join('');
+}
+function typeBar(ty,total){
+  if(!total)return'';
+  return '<div class="tybar">'+TY_ORDER.map(function(t){
+    var n=ty[t]||0; if(!n)return'';
+    return '<i style="width:'+((n/total)*100)+'%;background:'+typeColor(t)+'"></i>';
+  }).join('')+'</div>';
+}
+function gradeBg(g){return {A:'#00bfa522',B:'#3d9dff22',C:'#f0883e22',D:'#7c7c8c22'}[g]||'#7c7c8c22';}
+function gradeFg(g){return {A:'#00bfa5',B:'#3d9dff',C:'#f0883e',D:'#7c7c8c'}[g]||'#7c7c8c';}
+
+function drawBoard(){
+  var full = lbMode==='edits' ? (BOARD=BOARD||buildBoard()) : (CBOARD=CBOARD||buildCompBoard());
+  var rowsArr=full;
+  if(q){var k=q.toLowerCase();rowsArr=full.filter(function(r){return r.name.toLowerCase().indexOf(k)>=0;});}
+  el('top-ct').textContent=rowsArr.length.toLocaleString()+' editors';
+  el('crumb').innerHTML='<span class="cr now">leaderboard</span>';
+  var maxPts=rowsArr.length?rowsArr[0].pts:1;
+  if(full.length) maxPts=full[0].pts||1;
+
+  var body=rowsArr.map(function(r,i){
+    var cls=i===0?' top1':i===1?' top2':i===2?' top3':'';
+    function cell(n,c){return '<div class="lb-t '+(n?c:'z')+'">'+(n||'&mdash;')+'</div>';}
+    return '<div class="lbr'+cls+'">'+
+      '<div class="lb-pos">'+(i+1)+'</div>'+
+      '<div class="lb-av" style="background:'+avColor(r.name)+'">'+esc(initials(r.name))+'</div>'+
+      '<div class="lb-nm"><div class="lb-nm-t">'+esc(r.name)+'</div>'+
+        '<div class="lb-nm-s">'+r.def+' '+(lbMode==='edits'?'ranked':'ranked comps')+' \u00b7 '+
+        r.spc+' special'+(r.hl?' \u00b7 '+r.hl+' \u2605':'')+'</div></div>'+
+      '<div class="lb-tycol"><div class="lb-ty">'+typeChips(r.ty)+'</div>'+typeBar(r.ty,r.edits)+'</div>'+
+      cell(r.t1,'t-g')+cell(r.t2,'t-s')+cell(r.t3,'t-b')+cell(r.t4,'t-d')+
+      '<div class="lb-e">'+r.edits+'</div>'+
+      '<div class="lb-p"><div class="pk-val">'+r.pts.toFixed(1)+'</div>'+
+        '<div class="pk-meter"><div class="pk-fill" style="width:'+
+          Math.max(2,Math.min(100,(r.pts/maxPts)*100)).toFixed(1)+'%"></div></div></div>'+
+    '</div>';
+  }).join('');
+
+  el('lb').innerHTML=
+    '<div id="lb-head">'+
+      '<div id="lb-t">Editor Leaderboard</div>'+
+      '<div id="lb-modes">'+
+        '<div class="lbm'+(lbMode==='edits'?' on':'')+'" data-lm="edits">Edits</div>'+
+        '<div class="lbm'+(lbMode==='comps'?' on':'')+'" data-lm="comps">Comps</div>'+
+      '</div>'+
+      '<div id="lb-s">'+(lbMode==='edits'
+        ? 'Ranked by total points across every era. Placement columns combine both tabs &mdash; ranked #1 sums with grade A, #2 with B, #3 with C, #4+ with D.'
+        : 'Comps only. WIP and cancelled comps score nothing. Same points system as the edits board.')+
+      '</div></div>'+
+    '<div id="lb-body">'+
+      '<div class="lb-cols"><div class="lb-c-pos">#</div><div style="width:52px;flex-shrink:0"></div>'+
+        '<div class="lb-c-nm">Editor</div><div class="lb-c-ty">Edit types</div>'+
+        '<div class="lb-c-t">1 / A</div><div class="lb-c-t">2 / B</div>'+
+        '<div class="lb-c-t">3 / C</div><div class="lb-c-t">4 / D</div>'+
+        '<div class="lb-c-e">Edits</div><div class="lb-c-p">Points</div></div>'+
+      (rowsArr.length?body:'<div class="none">NO EDITORS<small>Try a different search</small></div>')+
+      '<div class="lb-legend">'+
+        '<span><b>1/A</b> 3pts</span><span><b>2/B</b> 2pts</span><span><b>3/C</b> 1pt</span>'+
+        '<span><b>4/D</b> 0.5pts</span><span><b>&#9733;</b> &times;1.25</span>'+
+        '<span><b>collab</b> &divide;&radic;editors</span><span><b>ranked</b> &times;&radic;(filled&divide;4)</span>'+
+      '</div></div>';
+
+  Array.prototype.forEach.call(el('lb').querySelectorAll('[data-lm]'),function(n){
+    n.onclick=function(){lbMode=n.getAttribute('data-lm');drawBoard();};
+  });
+}
+
+/* ══════ GUIDE MODAL ══════ */
+el('r-guide').onclick=function(){el('ov').classList.add('on');};
+el('md-x').onclick=function(){el('ov').classList.remove('on');};
+el('ov').onclick=function(e){if(e.target===this)this.classList.remove('on');};
+
+/* ══════ SEARCH BAR (bottom, tracker + leaderboard) ══════ */
+var _st;
+el('sq').oninput=function(){
+  q=this.value.trim();
+  el('sx').style.display=q?'block':'none';
+  clearTimeout(_st);
+  _st=setTimeout(function(){
+    if(view==='board') drawBoard();
+    else { crumbs(); if(q) drawSearch(); else draw(); }
+  },130);
+};
+el('sx').onclick=function(){el('sq').value='';q='';this.style.display='none';
+  if(view==='board')drawBoard(); else {crumbs();draw();}
+};
+el('era-find').oninput=function(){eq=this.value.trim().toLowerCase();drawEras();};
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='/' && document.activeElement!==el('sq') && document.activeElement!==el('era-find')
+     && document.activeElement!==el('mg-q')){
+    e.preventDefault(); if(view!=='comps') el('sq').focus(); else el('mg-q') && el('mg-q').focus();
+  }
+  if(e.key==='Escape'){
+    if(el('ov').classList.contains('on')){el('ov').classList.remove('on');return;}
+    if(document.body.classList.contains('nav')){closeNav();return;}
+    if(view==='comps'){
+      if(el('mg-info')&&el('mg-info').classList.contains('on')){el('mg-info').classList.remove('on');mgSel=null;drawMgRows();return;}
+      if(mgEra){mgEra=null;mgSel=null;mgQ='';drawMega();return;}
+    }
+    if(view==='tracker'){
+      if(q){clearSearchBox();return;}
+      if(curSong){curSong=null;draw();return;}
+      if(curEra){curEra=null;drawEras();draw();return;}
+    }
+  }
+});
+function clearSearchBox(){el('sq').value='';q='';el('sx').style.display='none';crumbs();draw();}
+
+/* ══════ REFRESH BUTTONS (event delegation \u2014 works for dynamically redrawn comps bar too) ══════ */
+document.addEventListener('click',function(e){
+  var b=e.target.closest && e.target.closest('[data-refresh]');
+  if(b){ runSync(true); }
+});
+
+/* ══════ STATIC FILTER PILLS (edits page \u2014 bound once, DOM never replaced) ══════ */
+bindPills(el('filters'), function(){ if(q) drawSearch(); else draw(); });
+el('clr-edits').onclick=function(){ clearAllFilters(); if(q) drawSearch(); else draw(); };
+
+/* ══════ INIT ══════ */
+drawEras();
+setView('tracker');
+runSync(false);
+
+</script>
+</body>
+</html>
