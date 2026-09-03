@@ -44,15 +44,24 @@ html,body{height:100%;overflow:hidden;background:var(--chat);color:var(--tx2);
 
 /* ── SIDEBAR ── */
 #side{width:240px;min-width:240px;background:var(--side);display:flex;flex-direction:column;overflow:hidden}
-#shdr{height:48px;padding:0 16px;display:flex;align-items:center;cursor:pointer;flex-shrink:0;
+#shdr{height:48px;padding:0 16px;display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0;
   box-shadow:0 1px 0 rgba(4,4,5,.2)}
 #shdr:hover{background:var(--hov)}
 #brand{font-size:16px;font-weight:600;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#brand-ct{font-size:10.5px;font-weight:700;color:var(--tx3);background:var(--input);
+  padding:2px 7px;border-radius:10px;font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap}
 #fw{padding:8px}
 #era-find{width:100%;background:#1e1f22;border:none;border-radius:4px;outline:none;color:var(--tx2);
   font:500 14px 'Noto Sans',sans-serif;padding:7px 8px}
 #era-find::placeholder{color:var(--fnt)}
 #era-list{overflow-y:auto;flex:1;padding:0 0 20px 8px}
+#stat-bar{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--line);
+  flex-shrink:0;flex-wrap:wrap}
+.stat-item{font-size:11px;color:var(--fnt);display:flex;align-items:center;gap:5px}
+.stat-item b{color:var(--tx2);font-weight:700;font-family:'JetBrains Mono',monospace}
+.stat-dot{width:6px;height:6px;border-radius:50%;background:var(--grn);flex-shrink:0;
+  box-shadow:0 0 0 0 rgba(35,165,90,.5);animation:statpulse 2s infinite}
+@keyframes statpulse{70%{box-shadow:0 0 0 6px rgba(35,165,90,0)}100%{box-shadow:0 0 0 0 rgba(35,165,90,0)}}
 #era-list::-webkit-scrollbar{width:8px}
 #era-list::-webkit-scrollbar-thumb{background:#1a1b1e;border-radius:4px;border:2px solid var(--side);background-clip:padding-box}
 .sec-lbl{font-size:12px;font-weight:600;color:var(--mut);text-transform:uppercase;padding:16px 8px 4px;
@@ -147,7 +156,8 @@ html,body{height:100%;overflow:hidden;background:var(--chat);color:var(--tx2);
 .song-n{font-size:16px;font-weight:500;color:var(--tx);overflow:hidden;text-overflow:ellipsis;
   white-space:nowrap;display:flex;align-items:center;gap:7px}
 .song-n b{font-weight:600;color:#fff}
-.song-m{font-size:12px;color:var(--fnt);margin-top:2px}
+.song-m{font-size:12px;color:var(--fnt);margin-top:2px;display:flex;align-items:center;gap:5px}
+.sec-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .song-r{display:flex;gap:10px;align-items:center;flex-shrink:0;padding-top:8px}
 .dots{display:flex;gap:3px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--input)}
@@ -265,7 +275,14 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
 #mg-q:focus{border-color:#4a4a4a;background:#232323}
 #mg-q::placeholder{color:var(--mgt3)}
 #mg-av{width:32px;height:32px;border-radius:50%;background:#d9272e;color:#fff;display:flex;
-  align-items:center;justify-content:center;font-size:14px;font-weight:600;margin-left:auto;flex-shrink:0}
+  align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+#mg-stats{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.mg-stat{font-size:11.5px;color:var(--mgt3);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.mg-stat b{color:var(--mgt2);font-weight:700;font-family:'JetBrains Mono',monospace}
+.mg-stat-dot{width:6px;height:6px;border-radius:50%;background:#4ad182;flex-shrink:0;
+  box-shadow:0 0 0 0 rgba(74,209,130,.5);animation:mgstatpulse 2s infinite}
+@keyframes mgstatpulse{70%{box-shadow:0 0 0 6px rgba(74,209,130,0)}100%{box-shadow:0 0 0 0 rgba(74,209,130,0)}}
+@media(max-width:820px){#mg-stats{display:none}}
 #mg-crumb{display:flex;align-items:center;gap:7px;padding:0 20px 12px;font-size:15px;flex-shrink:0}
 .mgc{color:var(--mgt2);cursor:pointer;font-weight:600;white-space:nowrap}
 .mgc:hover{color:#f2f2f2}
@@ -419,9 +436,24 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
   border:1px solid #262626;border-radius:3px 3px 0 0;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(0,0,0,.3);
   text-shadow:0 -1px 0 rgba(0,0,0,.65);display:flex;align-items:center;gap:9px}
+#lb-count{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:none;
+  color:var(--flt2);background:linear-gradient(180deg,#181818,#0f0f0f);border:1px solid #0c0c0c;
+  border-radius:2px;padding:2px 8px;box-shadow:inset 1px 1px 2px rgba(0,0,0,.85);
+  font-family:'JetBrains Mono',monospace;text-shadow:none}
 #lb-t::before{content:'';width:9px;height:9px;border-radius:50%;flex-shrink:0;
   background:radial-gradient(circle at 35% 30%,#ffd08a,var(--flo) 55%,#a55c05);
   box-shadow:0 0 7px rgba(246,147,30,.85)}
+#lb-stats{display:flex;gap:0;background:linear-gradient(180deg,#3a3a3a,#333);
+  border:1px solid #262626;border-top:none}
+.lb-stat{flex:1;padding:5px 10px 6px;text-align:center;border-right:1px solid rgba(0,0,0,.35);
+  box-shadow:inset -1px 0 0 rgba(255,255,255,.045)}
+.lb-stat:last-child{border-right:none;box-shadow:none}
+.lb-stat-lbl{font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--flt3);text-shadow:0 -1px 0 rgba(0,0,0,.5)}
+.lb-stat-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;
+  color:var(--flo2);text-shadow:0 0 7px rgba(246,147,30,.6);margin-top:1px;
+  background:linear-gradient(180deg,#181818,#0f0f0f);border-radius:2px;
+  box-shadow:inset 1px 1px 2px rgba(0,0,0,.85);padding:2px 0;margin-top:3px}
 #lb-modes{display:flex;gap:0;background:linear-gradient(180deg,#464646,#3e3e3e);border:1px solid #262626;
   border-top:none;padding:6px 10px;gap:6px}
 .lbm{font-size:11px;font-weight:700;padding:5px 14px;border-radius:2px;cursor:pointer;
@@ -431,6 +463,38 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
 .lbm:hover{color:var(--flt)}
 .lbm.on{background:linear-gradient(180deg,#f6931e,#c9760f);color:#241300;border-color:#8a5208;
   text-shadow:0 1px 0 rgba(255,255,255,.25)}
+#lb-filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  background:linear-gradient(180deg,#464646,#3e3e3e);border:1px solid #262626;border-top:none;
+  padding:8px 10px}
+.lb-flbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--flt3);text-shadow:0 -1px 0 rgba(0,0,0,.5);margin-right:2px}
+.lb-fdiv{width:1px;height:15px;background:#262626;box-shadow:1px 0 0 rgba(255,255,255,.05)}
+.flpill{font-size:10.5px;font-weight:600;padding:4px 11px;border-radius:2px;cursor:pointer;
+  background:linear-gradient(180deg,#3a3a3a,#303030);border:1px solid #242424;color:var(--flt2);
+  text-shadow:0 -1px 0 rgba(0,0,0,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  white-space:nowrap;user-select:none}
+.flpill:hover{color:var(--flt)}
+.flpill.on{background:linear-gradient(180deg,#5a5a5a,#454545);color:var(--flo2);
+  border-color:#8a5208;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(246,147,30,.25)}
+.flpill.clear{background:linear-gradient(180deg,#333,#2a2a2a);color:var(--flt3)}
+.flpill.clear:hover{color:#ff8a8d}
+#lb-era-panel{background:linear-gradient(180deg,#3e3e3e,#383838);border:1px solid #262626;border-top:none;
+  padding:10px}
+#lb-era-search{width:100%;background:linear-gradient(180deg,#181818,#101010);border:1px solid #262626;
+  border-radius:2px;box-shadow:inset 1px 1px 3px rgba(0,0,0,.85);color:#e8b923;
+  font-family:'JetBrains Mono',monospace;font-size:12px;padding:7px 10px;outline:none;margin-bottom:8px}
+#lb-era-search::placeholder{color:#6e6e6e}
+#lb-era-actions{display:flex;gap:6px;margin-bottom:8px}
+#lb-era-grid{max-height:180px;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:2px 10px}
+#lb-era-grid::-webkit-scrollbar{width:9px}
+#lb-era-grid::-webkit-scrollbar-thumb{background:#222;border-radius:5px;border:2px solid #383838;background-clip:padding-box}
+.lb-era-row{display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:2px;cursor:pointer;
+  font-size:11.5px;color:var(--flt2);transition:background-color .1s}
+.lb-era-row:hover{background:rgba(255,255,255,.04)}
+.lb-era-row input{width:13px;height:13px;accent-color:#f6931e;cursor:pointer;flex-shrink:0}
+.lb-era-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-era-empty{grid-column:1/-1;text-align:center;padding:16px;color:var(--flt3);font-size:11px}
 #lb-s{font-size:10.5px;color:var(--flt2);padding:9px 12px;background:linear-gradient(180deg,#464646,#3e3e3e);
   border:1px solid #262626;border-top:none;line-height:1.65;text-shadow:0 -1px 0 rgba(0,0,0,.4)}
 #lb-body{padding:0 12px 40px}
@@ -509,6 +573,20 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
   display:flex;align-items:center;gap:6px}
 .lb-legend b{color:var(--flo2);font-weight:700}
 
+/* FL-styled search bar, swapped in only while on the leaderboard --
+   the shared #sbar/#sw/#sq elements get this class toggled on, replacing
+   the Discord rounded-pill look with FL's bevelled LED-input treatment */
+#sbar.fl-mode{background:#3a3a3a;padding-top:10px;
+  background-image:linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px);background-size:100% 3px}
+#sw.fl-mode{background:linear-gradient(180deg,#181818,#101010);border:1px solid #262626;border-radius:2px;
+  box-shadow:inset 1px 1px 3px rgba(0,0,0,.85);padding:0 14px}
+#sw.fl-mode #sq{color:#e8b923;font-family:'JetBrains Mono',monospace;font-size:14px;
+  text-shadow:0 0 6px rgba(232,185,35,.35)}
+#sw.fl-mode #sq::placeholder{color:#6e6e6e;text-shadow:none}
+#sw.fl-mode .si{color:#8a8a8a}
+#sw.fl-mode kbd{background:linear-gradient(180deg,#3a3a3a,#2e2e2e);border:1px solid #1c1c1c;color:#9c9c9c;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+
 /* ═══ MODALS ═══ */
 #ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:center;
   justify-content:center;padding:24px}
@@ -554,6 +632,8 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
 @media(max-width:820px){
   html,body{font-size:15px}
   #burger{display:flex}
+  #lb-stats{display:none}
+  #lb-era-grid{grid-template-columns:1fr 1fr}
   #rail{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);
     transition:transform .22s cubic-bezier(.2,.9,.3,1);width:64px;min-width:64px}
   #side{position:fixed;left:64px;top:0;bottom:0;width:min(74vw,260px);min-width:0;z-index:56;
@@ -618,9 +698,14 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
   </div>
 
   <div id="side">
-    <div id="shdr"><span id="brand">Yedits Tracker</span><span style="color:var(--tx2);font-size:11px">&#9662;</span></div>
+    <div id="shdr"><span id="brand">Yedits Tracker</span><span id="brand-ct"></span><span style="color:var(--tx2);font-size:11px">&#9662;</span></div>
     <div id="fw"><input id="era-find" placeholder="Search eras" autocomplete="off" spellcheck="false"></div>
     <div id="era-list"></div>
+    <div id="stat-bar">
+      <span class="stat-item"><span class="stat-dot"></span><b id="stat-live">&mdash;</b> live</span>
+      <span class="stat-item"><b id="stat-total">&mdash;</b> visits</span>
+      <span class="stat-item"><b id="stat-unique">&mdash;</b> unique</span>
+    </div>
   </div>
 
   <div id="main">
@@ -725,6 +810,10 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
 var SHEET_EDITS = 'https://docs.google.com/spreadsheets/d/1J83vvogabRvZtP48De4uTHqXQeNQKQqfKdMkfCN_Ivk/gviz/tq?tqx=out:csv&headers=1&gid=1171110052';
 var SHEET_COMPS = 'https://docs.google.com/spreadsheets/d/1J83vvogabRvZtP48De4uTHqXQeNQKQqfKdMkfCN_Ivk/gviz/tq?tqx=out:csv&headers=1&gid=1693937245';
 
+/* Visitor counter — paste your Apps Script Web App URL here.
+   Leave blank to disable; the stat bar just shows dashes. */
+var ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbwk0-rymDL-x7nuCNmrXNojF6_bTsp1rlnH7SZ4i4gks2XMfhirA_BahpmYh_zG4wdYxA/exec';
+
 var DATA  = JSON.parse(document.getElementById('D').textContent);
 var CDATA = JSON.parse(document.getElementById('CD').textContent);
 var ERAS  = DATA.eras;
@@ -759,6 +848,12 @@ var AV=['#f23f43','#f0883e','#23a55a','#00a8fc','#c07ef5','#f0b132','#e93d82','#
 function avColor(s){var h=0;for(var i=0;i<String(s).length;i++)h=(h*31+String(s).charCodeAt(i))&0x7fffffff;
   return AV[h%AV.length];}
 function countEdits(s){return s.d.length+s.p.length;}
+function totalEditsCount(){
+  var n=0; ERAS.forEach(function(e){e.songs.forEach(function(s){n+=countEdits(s);});}); return n;
+}
+function totalCompsCount(){
+  var n=0; CERAS.forEach(function(e){n+=(e.r||[]).length+(e.p||[]).length+(e.w||[]).length+(e.x||[]).length;}); return n;
+}
 var _tt;
 function toast(m,e2){var t=el('toast');t.textContent=m;t.className=e2?'err':'';t.style.display='block';
   clearTimeout(_tt);_tt=setTimeout(function(){t.style.display='none';},2600);}
@@ -815,12 +910,61 @@ function autoColor(name){
   return palette[h%palette.length];
 }
 
+/* ── section colours ──
+   Every era can have DIFFERENT colours per section (Album Tracks vs a Leaks
+   section vs a named mixtape grouping like "I'm Good..." under The College
+   Dropout). Resolution order:
+     1. explicit override from the sheet's section_color column
+     2. "Album Tracks" (or blank) -- inherits the era's own colour, no shift
+     3. anything that looks like a leaks section -- automatic red-shifted variant
+     4. everything else -- a deterministic colour hashed from era+section name,
+        so distinct sections are visually distinguishable even with zero setup */
+function hexToHsl(hex){
+  var r=parseInt(hex.slice(1,3),16)/255, g=parseInt(hex.slice(3,5),16)/255, b=parseInt(hex.slice(5,7),16)/255;
+  var max=Math.max(r,g,b), min=Math.min(r,g,b), h=0,s=0,l=(max+min)/2;
+  if(max!==min){
+    var d=max-min;
+    s=l>0.5?d/(2-max-min):d/(max+min);
+    if(max===r) h=(g-b)/d+(g<b?6:0);
+    else if(max===g) h=(b-r)/d+2;
+    else h=(r-g)/d+4;
+    h/=6;
+  }
+  return [h,s,l];
+}
+function hslToHex(h,s,l){
+  function f(n){
+    var k=(n+h*12)%12, a=s*Math.min(l,1-l);
+    var c=l-a*Math.max(-1,Math.min(k-3,Math.min(9-k,1)));
+    return Math.round(255*c).toString(16).padStart(2,'0');
+  }
+  return '#'+f(0)+f(8)+f(4);
+}
+function leakVariant(baseHex){
+  var hsl=hexToHsl(baseHex);
+  var h=(hsl[0]*360+345)%360/360;             /* shift hue toward red/amber */
+  var s=Math.min(1, hsl[1]*1.15+0.1);
+  var l=Math.max(0.28, Math.min(0.6, hsl[2]*0.85));
+  return hslToHex(h,s,l);
+}
+function isLeakSection(name){
+  return /leak/i.test(String(name||''));
+}
+function sectionColor(era, sectionName){
+  var sec=String(sectionName||'Album Tracks').trim();
+  if(era.sectionColors && era.sectionColors[sec]) return era.sectionColors[sec];
+  if(!sec || /^album tracks$/i.test(sec)) return era.color;
+  if(isLeakSection(sec)) return leakVariant(era.color);
+  return autoColor(era.name+'::'+sec);
+}
+
 function applyEdits(objs){
   var by={};
   ERAS.forEach(function(e){
     e.songs=[];       /* fully rebuild the song LIST from the sheet, not just each song's edits --
                           otherwise a renamed song lingers as a stale empty entry forever */
     e.img=null;
+    e.sectionColors={};   /* reset per sync so removed overrides actually revert to the smart default */
     by[e.name.toLowerCase()]=e;
   });
   var n=0;
@@ -830,15 +974,20 @@ function applyEdits(objs){
     var era=by[key];
     if(!era){          /* auto-create a brand-new era instead of silently dropping the row */
       var col=safeColor(o.era_color)||autoColor(eraName);
-      era={name:eraName, color:col, songs:[], img:null};
+      era={name:eraName, color:col, songs:[], img:null, sectionColors:{}};
       ERAS.push(era); by[key]=era;
     }
     if(!era.img){var ei=safeImgUrl(o.era_image); if(ei) era.img=ei;}
     if(o.era_color){var ec=safeColor(o.era_color); if(ec) era.color=ec;}
+    var sectionName=String(o.section||'Album Tracks').trim()||'Album Tracks';
+    if(o.section_color){
+      var sc=safeColor(o.section_color);
+      if(sc && !era.sectionColors[sectionName]) era.sectionColors[sectionName]=sc;
+    }
     var sn=String(o.song||'').trim(); if(!sn)return;
     var song=era.songs.filter(function(s){return s.n.toLowerCase()===sn.toLowerCase();})[0];
-    if(!song){song={n:sn,s:o.section||'Album Tracks',d:[],p:[],img:null};era.songs.push(song);}
-    else if(o.section) song.s=o.section;   /* keep the section current even for songs that already exist */
+    if(!song){song={n:sn,s:sectionName,d:[],p:[],img:null};era.songs.push(song);}
+    else if(o.section) song.s=sectionName;   /* keep the section current even for songs that already exist */
     if(!song.img){var si=safeImgUrl(o.song_image); if(si) song.img=si;}
     var spec=/^s/i.test(o.tab||'');
     var ob={title:o.title||sn,creator:o.creator||'unknown',type:o.type||'Renovation',
@@ -933,6 +1082,7 @@ function runSync(loud){
 
 /* ══════ SIDEBAR ══════ */
 function drawEras(){
+  var bc=el('brand-ct'); if(bc) bc.textContent=totalEditsCount().toLocaleString()+' edits';
   var L=el('era-list'); L.innerHTML='';
   var list=eq?ERAS.filter(function(e){return e.name.toLowerCase().indexOf(eq)>=0;}):ERAS;
   if(!eq){
@@ -1124,10 +1274,11 @@ function draw(){
   R.forEach(function(r){
     var key=r.e.name+' :: '+r.s.s;
     if(key!==last){last=key;
+      var sc=sectionColor(r.e,r.s.s);
       var h=document.createElement('div');h.className='grp';
       var lbl=curEra?r.s.s:r.e.name+'  \u00b7  '+r.s.s;
       h.innerHTML='<div class="grp-l"></div><div class="grp-t">'+
-        '<span class="grp-d" style="background:'+r.e.color+'"></span>'+esc(lbl)+
+        '<span class="grp-d" style="background:'+sc+'"></span>'+esc(lbl)+
         '</div><div class="grp-l"></div>';
       frag.appendChild(h);}
     frag.appendChild(songRow(r));
@@ -1143,7 +1294,8 @@ function avatarHTML(cls, img, fallbackBg, fallbackTxt, extraAttrs){
 
 function songRow(r){
   var s=r.s,d=document.createElement('div');
-  d.className='song';d.style.setProperty('--sc',r.e.color);
+  var sc=sectionColor(r.e,s.s);
+  d.className='song';d.style.setProperty('--sc',sc);
   var dots='';
   for(var i=0;i<4;i++){var f=s.d[i];
     dots+='<span class="dot"'+(f?' style="background:'+typeColor(f.type)+'"':'')+'></span>';}
@@ -1151,12 +1303,13 @@ function songRow(r){
   var flags='';
   if(s.d.concat(s.p).some(function(x){return x.comp;})) flags+='<span class="chip comp">comp</span>';
   if(s.d.concat(s.p).some(function(x){return x.out;})) flags+='<span class="chip out">outdated</span>';
-  d.innerHTML=avatarHTML('song-i', s.img, r.e.color, esc(initials(s.n)))+
+  d.innerHTML=avatarHTML('song-i', s.img, sc, esc(initials(s.n)))+
     '<div class="song-b"><div class="song-n"><b>'+esc(s.n)+'</b>'+flags+'</div>'+
-    '<div class="song-m">'+esc(r.e.name)+' &nbsp;&middot;&nbsp; '+esc(s.s)+'</div></div>'+
+    '<div class="song-m"><span class="sec-dot" style="background:'+sc+'"></span>'+
+    esc(r.e.name)+' &nbsp;&middot;&nbsp; '+esc(s.s)+'</div></div>'+
     '<div class="song-r"><span class="dots">'+dots+'</span>'+
     '<span class="tally">'+(n?n+' edit'+(n>1?'s':''):'&mdash;')+'</span></div>';
-  d.onclick=function(){curSong={era:r.e.name,color:r.e.color,eraImg:r.e.img,s:s};curTab='d';draw();};
+  d.onclick=function(){curSong={era:r.e.name,color:sc,eraImg:r.e.img,s:s};curTab='d';draw();};
   return d;
 }
 
@@ -1322,6 +1475,12 @@ function drawMega(){
     '<div id="mg-top"><div id="mg-logo">M</div>'+
       '<div id="mg-search">'+MAG+'<input id="mg-q" placeholder="Search '+
         (era?esc(era.name):'all comps')+'" autocomplete="off" spellcheck="false"></div>'+
+      '<div id="mg-stats">'+
+        '<span class="mg-stat"><b id="mg-stat-comps">'+totalCompsCount().toLocaleString()+'</b> comps</span>'+
+        '<span class="mg-stat"><span class="mg-stat-dot"></span><b id="mg-stat-live">&mdash;</b> live</span>'+
+        '<span class="mg-stat"><b id="mg-stat-total">&mdash;</b> visits</span>'+
+        '<span class="mg-stat"><b id="mg-stat-unique">&mdash;</b> unique</span>'+
+      '</div>'+
       '<div id="mg-av">Y</div></div>'+
     '<div class="sheetbar '+esc(lastSheetState)+'" id="mg-sheetbar"><span class="dot"></span><span class="msg" id="mg-sheetmsg">'+esc(lastSheetMsg)+'</span>'+
       '<button class="rfr" data-refresh>Refresh</button></div>'+
@@ -1523,6 +1682,7 @@ function setView(v){
   el('side').style.display    = isTracker?'':'none';
   el('filters').style.display = isTracker?'':'none';
   el('body').style.display    = isTracker?'':'none';
+  el('top').style.display     = isTracker?'':'none';   /* Comps + Leaderboard have their own native headers */
   el('lb').classList.toggle('on', v==='board');
   el('mg').classList.toggle('on', v==='comps');
 
@@ -1532,6 +1692,8 @@ function setView(v){
 
   /* bottom search bar: used by tracker + leaderboard; comps has its own top search */
   el('sbar').style.display = (v==='comps') ? 'none' : '';
+  el('sbar').classList.toggle('fl-mode', v==='board');
+  el('sw').classList.toggle('fl-mode', v==='board');
   el('sq').placeholder = v==='board'
     ? 'Search editors\u2026'
     : 'Search songs, edits, editors, comps\u2026';
@@ -1540,6 +1702,7 @@ function setView(v){
   if(v==='board') drawBoard();
   else if(v==='comps') drawMega();
   else { crumbs(); if(q) drawSearch(); else draw(); }
+  if(LAST_STATS) renderStats(LAST_STATS);   /* show cached numbers instantly on switch, don't wait for the next tick */
 }
 el('r-edits').onclick=function(){setView('tracker');};
 el('r-comps').onclick=function(){setView('comps');};
@@ -1572,14 +1735,28 @@ function newRow(nm){
     ty:{'Overhaul':0,'Renovation':0,'Vanilla-Style':0,'Extension':0,'Remix':0}};
 }
 
+/* ═══ leaderboard filter state: type / kind (ranked vs special) / era, all multi-select and stackable ═══ */
+var lbFType={}, lbFKind={}, lbFEra={}, lbEraPanelOpen=false, lbEraSearch='';
+function lbAnyType(){ return Object.keys(lbFType).some(function(k){return lbFType[k];}); }
+function lbAnyKind(){ return Object.keys(lbFKind).some(function(k){return lbFKind[k];}); }
+function lbAnyEra(){ return Object.keys(lbFEra).some(function(k){return lbFEra[k];}); }
+function lbAnyFilter(){ return lbAnyType()||lbAnyKind()||lbAnyEra(); }
+function lbPassType(t){ return !lbAnyType() || (t && lbFType[t]); }
+function lbPassKind(k){ return !lbAnyKind() || (k==='d'&&lbFKind.ranked) || (k==='p'&&lbFKind.special); }
+function lbPassEra(nm){ return !lbAnyEra() || !!lbFEra[nm]; }
+function lbClear(){ lbFType={}; lbFKind={}; lbFEra={}; }
+
 function buildBoard(){
   var map={};
   function bucket(nm){var k=nm.toLowerCase();if(!map[k])map[k]=newRow(nm);return map[k];}
   ERAS.forEach(function(era){
+    if(!lbPassEra(era.name)) return;
     era.songs.forEach(function(s){
-      var filled=new Set(); s.d.forEach(function(x){var rv=x.rank||1;if(rv<=4)filled.add(rv);});
+      var dList = lbPassKind('d') ? s.d.filter(function(x){return lbPassType(x.type);}) : [];
+      var pList = lbPassKind('p') ? s.p.filter(function(x){return lbPassType(x.type);}) : [];
+      var filled=new Set(); dList.forEach(function(x){var rv=x.rank||1;if(rv<=4)filled.add(rv);});
       var slotMult=Math.sqrt(Math.min(filled.size,4)/4);
-      s.d.forEach(function(x){
+      dList.forEach(function(x){
         var rv=x.rank||1;
         var base=rv===1?3:rv===2?2:rv===3?1:0.5;
         var pts=base*slotMult*(x.hl?1.25:1);
@@ -1591,7 +1768,7 @@ function buildBoard(){
           if(rv===1) r.t1++; else if(rv===2) r.t2++; else if(rv===3) r.t3++; else r.t4++;
         });
       });
-      s.p.forEach(function(x){
+      pList.forEach(function(x){
         var g=x.g||'D';
         var pts=(GRADE_PTS[g]!==undefined?GRADE_PTS[g]:0.5)*(x.hl?1.25:1);
         var eds=splitEditors(x.creator); pts/=Math.sqrt(eds.length);
@@ -1614,9 +1791,12 @@ function buildCompBoard(){
   var map={};
   function bucket(nm){var k=nm.toLowerCase();if(!map[k])map[k]=newRow(nm);return map[k];}
   CERAS.forEach(function(era){
-    var filled=new Set(); (era.r||[]).forEach(function(x){var rv=x.rank||1;if(rv<=4)filled.add(rv);});
+    if(!lbPassEra(era.name)) return;
+    var rList = lbPassKind('d') ? (era.r||[]).filter(function(x){return lbPassType(mapCatType(x.cat));}) : [];
+    var pList = lbPassKind('p') ? (era.p||[]).filter(function(x){return lbPassType(mapCatType(x.cat));}) : [];
+    var filled=new Set(); rList.forEach(function(x){var rv=x.rank||1;if(rv<=4)filled.add(rv);});
     var slotMult=Math.sqrt(Math.min(filled.size,4)/4);
-    (era.r||[]).forEach(function(x){
+    rList.forEach(function(x){
       var rv=x.rank||1;
       var base=rv===1?3:rv===2?2:rv===3?1:0.5;
       var pts=base*slotMult*(x.hl?1.25:1);
@@ -1629,7 +1809,7 @@ function buildCompBoard(){
         if(rv===1) r.t1++; else if(rv===2) r.t2++; else if(rv===3) r.t3++; else r.t4++;
       });
     });
-    (era.p||[]).forEach(function(x){
+    pList.forEach(function(x){
       var g=x.g||'D';
       var pts=(GRADE_PTS[g]!==undefined?GRADE_PTS[g]:0.5)*(x.hl?1.25:1);
       var eds=splitEditors(x.creator); pts/=Math.sqrt(eds.length);
@@ -1669,11 +1849,10 @@ function gradeBg(g){return {A:'#00bfa522',B:'#3d9dff22',C:'#f0883e22',D:'#7c7c8c
 function gradeFg(g){return {A:'#00bfa5',B:'#3d9dff',C:'#f0883e',D:'#7c7c8c'}[g]||'#7c7c8c';}
 
 function drawBoard(){
-  var full = lbMode==='edits' ? (BOARD=BOARD||buildBoard()) : (CBOARD=CBOARD||buildCompBoard());
+  var full = lbMode==='edits' ? buildBoard() : buildCompBoard();   /* always fresh -- filters can change every click */
   var rowsArr=full;
   if(q){var k=q.toLowerCase();rowsArr=full.filter(function(r){return r.name.toLowerCase().indexOf(k)>=0;});}
-  el('top-ct').textContent=rowsArr.length.toLocaleString()+' editors';
-  el('crumb').innerHTML='<span class="cr now">leaderboard</span>';
+  var editorCount=rowsArr.length;
   var maxPts=rowsArr.length?rowsArr[0].pts:1;
   if(full.length) maxPts=full[0].pts||1;
 
@@ -1695,16 +1874,58 @@ function drawBoard(){
     '</div>';
   }).join('');
 
+  var eraList = lbMode==='edits' ? ERAS.map(function(e){return e.name;}) : CERAS.map(function(e){return e.name;});
+  var eraSelCount = Object.keys(lbFEra).filter(function(k){return lbFEra[k];}).length;
+
   el('lb').innerHTML=
     '<div id="lb-head">'+
-      '<div id="lb-t">Editor Leaderboard</div>'+
+      '<div id="lb-t">Editor Leaderboard<span id="lb-count">'+editorCount.toLocaleString()+' editors</span></div>'+
+      '<div id="lb-stats">'+
+        '<div class="lb-stat"><div class="lb-stat-lbl">Live</div><div class="lb-stat-val" id="lb-stat-live">&mdash;</div></div>'+
+        '<div class="lb-stat"><div class="lb-stat-lbl">Visits</div><div class="lb-stat-val" id="lb-stat-total">&mdash;</div></div>'+
+        '<div class="lb-stat"><div class="lb-stat-lbl">Unique</div><div class="lb-stat-val" id="lb-stat-unique">&mdash;</div></div>'+
+      '</div>'+
       '<div id="lb-modes">'+
         '<div class="lbm'+(lbMode==='edits'?' on':'')+'" data-lm="edits">Edits</div>'+
         '<div class="lbm'+(lbMode==='comps'?' on':'')+'" data-lm="comps">Comps</div>'+
       '</div>'+
+      '<div id="lb-filters">'+
+        '<span class="lb-flbl">Type</span>'+
+        TY_ORDER.map(function(t){
+          var on=lbFType[t];
+          return '<span class="flpill'+(on?' on':'')+'" data-lt="'+t+'"'+
+            (on?' style="border-color:'+typeColor(t)+';color:'+typeColor(t)+'"':'')+'>'+t+'</span>';
+        }).join('')+
+        '<span class="lb-fdiv"></span>'+
+        '<span class="lb-flbl">Kind</span>'+
+        '<span class="flpill'+(lbFKind.ranked?' on':'')+'" data-lk="ranked">Ranked</span>'+
+        '<span class="flpill'+(lbFKind.special?' on':'')+'" data-lk="special">Special</span>'+
+        '<span class="lb-fdiv"></span>'+
+        '<span class="flpill'+(eraSelCount||lbEraPanelOpen?' on':'')+'" id="lb-era-toggle">'+
+          (eraSelCount?eraSelCount+' era'+(eraSelCount>1?'s':''):'All eras')+' &#9662;</span>'+
+        '<span class="lb-fdiv"></span>'+
+        '<span class="flpill clear" id="lb-clr">Clear filters</span>'+
+      '</div>'+
+      (lbEraPanelOpen ? (function(){
+        var k=lbEraSearch.toLowerCase();
+        var filtered = k ? eraList.filter(function(n){return n.toLowerCase().indexOf(k)>=0;}) : eraList;
+        return '<div id="lb-era-panel">'+
+          '<input id="lb-era-search" placeholder="Search eras\u2026" value="'+esc(lbEraSearch)+'" autocomplete="off">'+
+          '<div id="lb-era-actions">'+
+            '<button class="flpill" id="lb-era-all">Select all</button>'+
+            '<button class="flpill" id="lb-era-none">Clear</button>'+
+          '</div>'+
+          '<div id="lb-era-grid">'+
+            (filtered.length ? filtered.map(function(n){
+              return '<label class="lb-era-row"><input type="checkbox" data-le="'+esc(n)+'"'+
+                (lbFEra[n]?' checked':'')+'><span>'+esc(n)+'</span></label>';
+            }).join('') : '<div class="lb-era-empty">No eras match</div>')+
+          '</div></div>';
+      })() : '')+
       '<div id="lb-s">'+(lbMode==='edits'
         ? 'Ranked by total points across every era. Placement columns combine both tabs &mdash; ranked #1 sums with grade A, #2 with B, #3 with C, #4+ with D.'
         : 'Comps only. WIP and cancelled comps score nothing. Same points system as the edits board.')+
+      (lbAnyFilter() ? ' <b style="color:var(--flo2)">Filters active.</b>' : '')+
       '</div></div>'+
     '<div id="lb-body">'+
       '<div class="lb-cols"><div class="lb-c-pos">#</div><div style="width:52px;flex-shrink:0"></div>'+
@@ -1722,6 +1943,37 @@ function drawBoard(){
   Array.prototype.forEach.call(el('lb').querySelectorAll('[data-lm]'),function(n){
     n.onclick=function(){lbMode=n.getAttribute('data-lm');drawBoard();};
   });
+  Array.prototype.forEach.call(el('lb').querySelectorAll('[data-lt]'),function(n){
+    n.onclick=function(){var t=n.getAttribute('data-lt'); lbFType[t]=!lbFType[t]; drawBoard();};
+  });
+  Array.prototype.forEach.call(el('lb').querySelectorAll('[data-lk]'),function(n){
+    n.onclick=function(){var k=n.getAttribute('data-lk'); lbFKind[k]=!lbFKind[k]; drawBoard();};
+  });
+  var et=el('lb-era-toggle');
+  if(et) et.onclick=function(){lbEraPanelOpen=!lbEraPanelOpen; drawBoard();};
+  var clr=el('lb-clr');
+  if(clr) clr.onclick=function(){lbClear(); lbEraPanelOpen=false; lbEraSearch=''; drawBoard();};
+  if(lbEraPanelOpen){
+    var es=el('lb-era-search');
+    if(es){
+      es.oninput=function(){
+        lbEraSearch=this.value; var pos=this.selectionStart;
+        drawBoard();
+        var n2=el('lb-era-search'); if(n2){ n2.focus(); n2.setSelectionRange(pos,pos); }
+      };
+    }
+    Array.prototype.forEach.call(el('lb').querySelectorAll('[data-le]'),function(n){
+      n.onchange=function(){ lbFEra[n.getAttribute('data-le')]=n.checked; drawBoard(); };
+    });
+    var eaAll=el('lb-era-all');
+    if(eaAll) eaAll.onclick=function(){
+      var list = lbMode==='edits' ? ERAS.map(function(e){return e.name;}) : CERAS.map(function(e){return e.name;});
+      list.forEach(function(n){ lbFEra[n]=true; });
+      drawBoard();
+    };
+    var eaNone=el('lb-era-none');
+    if(eaNone) eaNone.onclick=function(){ lbFEra={}; drawBoard(); };
+  }
 }
 
 /* ══════ GUIDE MODAL ══════ */
@@ -1776,10 +2028,57 @@ document.addEventListener('click',function(e){
 bindPills(el('filters'), function(){ if(q) drawSearch(); else draw(); });
 el('clr-edits').onclick=function(){ clearAllFilters(); if(q) drawSearch(); else draw(); };
 
+/* ══════ VISITOR ANALYTICS ══════
+   A tiny Google Apps Script Web App (see the .gs file) logs visits to a sheet.
+   No account/library needed beyond what's already set up. If ANALYTICS_URL is
+   left blank the stat bar just stays dashed out -- nothing else changes. */
+var VID_KEY='yedits_vid_v1';
+function getVisitorId(){
+  try{
+    var id=localStorage.getItem(VID_KEY);
+    if(!id){ id='v-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+      localStorage.setItem(VID_KEY,id); }
+    return id;
+  }catch(err){ return 'v-anon-'+Math.random().toString(36).slice(2,10); }
+}
+var VISITOR_ID=getVisitorId();
+
+var LAST_STATS=null;
+function renderStats(s){
+  if(!s) return;
+  LAST_STATS=s;
+  var prefixes=['stat','mg-stat','lb-stat'];
+  prefixes.forEach(function(p){
+    var l=el(p+'-live'), t=el(p+'-total'), u=el(p+'-unique');
+    if(l && s.live!=null) l.textContent=s.live;
+    if(t && s.total!=null) t.textContent=Number(s.total).toLocaleString();
+    if(u && s.unique!=null) u.textContent=Number(s.unique).toLocaleString();
+  });
+}
+function analyticsPing(action){
+  if(!ANALYTICS_URL) return;
+  var url=ANALYTICS_URL+(ANALYTICS_URL.indexOf('?')>=0?'&':'?')+
+    'action='+action+'&id='+encodeURIComponent(VISITOR_ID)+'&_='+Date.now();
+  fetch(url,{cache:'no-store'}).then(function(r){return r.json();})
+    .then(renderStats).catch(function(){});
+}
+function startAnalytics(){
+  if(!ANALYTICS_URL) return;
+  analyticsPing('visit');
+  setInterval(function(){
+    if(document.visibilityState==='visible') analyticsPing('ping');
+  },25000);
+  setInterval(function(){ analyticsPing('stats'); },30000);
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible') analyticsPing('ping');
+  });
+}
+
 /* ══════ INIT ══════ */
 drawEras();
 setView('tracker');
 runSync(false);
+startAnalytics();
 
 </script>
 </body>
