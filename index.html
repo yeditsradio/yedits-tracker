@@ -799,20 +799,46 @@ function setEditorImg(creatorStr, url){
 }
 
 /* ── apply sheet ── */
+function safeColor(hex){
+  if(!hex) return null;
+  hex=String(hex).trim();
+  if(/^#[0-9a-fA-F]{6}$/.test(hex)) return hex;
+  if(/^#[0-9a-fA-F]{3}$/.test(hex)){
+    return '#'+hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3];
+  }
+  return null;
+}
+function autoColor(name){
+  var h=0; var s=String(name||'');
+  for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))&0x7fffffff;
+  var palette=['#f23f43','#f0883e','#f0b132','#23a55a','#00a8fc','#5865f2','#c07ef5','#e93d82','#12a594','#c76a15'];
+  return palette[h%palette.length];
+}
+
 function applyEdits(objs){
   var by={};
   ERAS.forEach(function(e){
-    e.songs.forEach(function(s){s.d=[];s.p=[];s.img=null;});
+    e.songs=[];       /* fully rebuild the song LIST from the sheet, not just each song's edits --
+                          otherwise a renamed song lingers as a stale empty entry forever */
     e.img=null;
     by[e.name.toLowerCase()]=e;
   });
   var n=0;
   objs.forEach(function(o){
-    var era=by[String(o.era||'').toLowerCase()]; if(!era)return;
+    var eraName=String(o.era||'').trim(); if(!eraName)return;
+    var key=eraName.toLowerCase();
+    var era=by[key];
+    if(!era){          /* auto-create a brand-new era instead of silently dropping the row */
+      var col=safeColor(o.era_color)||autoColor(eraName);
+      era={name:eraName, color:col, songs:[], img:null};
+      ERAS.push(era); by[key]=era;
+    }
     if(!era.img){var ei=safeImgUrl(o.era_image); if(ei) era.img=ei;}
+    if(o.era_color){var ec=safeColor(o.era_color); if(ec) era.color=ec;}
     var sn=String(o.song||'').trim(); if(!sn)return;
     var song=era.songs.filter(function(s){return s.n.toLowerCase()===sn.toLowerCase();})[0];
     if(!song){song={n:sn,s:o.section||'Album Tracks',d:[],p:[],img:null};era.songs.push(song);}
+    else if(o.section) song.s=o.section;   /* keep the section current even for songs that already exist */
     if(!song.img){var si=safeImgUrl(o.song_image); if(si) song.img=si;}
     var spec=/^s/i.test(o.tab||'');
     var ob={title:o.title||sn,creator:o.creator||'unknown',type:o.type||'Renovation',
@@ -838,8 +864,12 @@ function applyComps(objs){
   objs.forEach(function(o){
     var key=String(o.era||'').toLowerCase(); if(!key)return;
     var era=by[key];
-    if(!era){era={name:o.era,color:'#8a8a95',r:[],p:[],w:[],x:[],img:null};CERAS.push(era);by[key]=era;}
+    if(!era){
+      var col=safeColor(o.era_color)||autoColor(o.era);
+      era={name:o.era,color:col,r:[],p:[],w:[],x:[],img:null};CERAS.push(era);by[key]=era;
+    }
     if(!era.img){var ei=safeImgUrl(o.era_image); if(ei) era.img=ei;}
+    if(o.era_color){var ec=safeColor(o.era_color); if(ec) era.color=ec;}
     var tab=String(o.tab||'ranked').toLowerCase();
     var st=normStatus(o.status);
     var ob={name:o.name||'',creator:o.creator||'unknown',cat:o.category||'Renovations',
