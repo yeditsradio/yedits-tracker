@@ -43,7 +43,7 @@ html,body{height:100%;overflow:hidden;background:var(--chat);color:var(--tx2);
 .rl-sep{width:32px;height:2px;background:#35373c;border-radius:1px;flex-shrink:0}
 
 /* ── SIDEBAR ── */
-#side{width:240px;min-width:240px;background:var(--side);display:flex;flex-direction:column;overflow:hidden}
+#side{width:240px;min-width:240px;background:var(--side);display:flex;flex-direction:column;overflow:hidden;min-height:0}
 #shdr{height:48px;padding:0 16px;display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0;
   box-shadow:0 1px 0 rgba(4,4,5,.2)}
 #shdr:hover{background:var(--hov)}
@@ -54,7 +54,7 @@ html,body{height:100%;overflow:hidden;background:var(--chat);color:var(--tx2);
 #era-find{width:100%;background:#1e1f22;border:none;border-radius:4px;outline:none;color:var(--tx2);
   font:500 14px 'Noto Sans',sans-serif;padding:7px 8px}
 #era-find::placeholder{color:var(--fnt)}
-#era-list{overflow-y:auto;flex:1;padding:0 0 20px 8px}
+#era-list{overflow-y:auto;flex:1;min-height:0;padding:0 0 20px 8px}
 #stat-bar{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--line);
   flex-shrink:0;flex-wrap:wrap}
 .stat-item{font-size:11px;color:var(--fnt);display:flex;align-items:center;gap:5px}
@@ -79,7 +79,7 @@ html,body{height:100%;overflow:hidden;background:var(--chat);color:var(--tx2);
 .era-ct{font-size:12px;font-weight:600;color:var(--fnt);flex-shrink:0;font-family:'JetBrains Mono',monospace}
 
 /* ── MAIN ── */
-#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0}
 #top{height:48px;padding:0 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;
   box-shadow:0 1px 0 rgba(4,4,5,.2);z-index:6;background:var(--chat)}
 #burger{display:none;width:34px;height:34px;border:none;background:none;color:var(--tx2);font-size:20px;
@@ -136,7 +136,7 @@ html,body{height:100%;overflow:hidden;background:var(--chat);color:var(--tx2);
 .f-div{width:1px;height:16px;background:var(--line);margin:0 4px;flex-shrink:0}
 
 /* ── LIST / MESSAGES ── */
-#body{flex:1;overflow-y:auto;padding:0 0 24px}
+#body{flex:1;overflow-y:auto;min-height:0;padding:0 0 24px}
 #body::-webkit-scrollbar{width:16px}
 #body::-webkit-scrollbar-thumb{background:#1a1b1e;border-radius:8px;border:4px solid transparent;background-clip:padding-box}
 .grp{display:flex;align-items:center;padding:24px 16px 8px}
@@ -262,7 +262,7 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
 .sr-r{flex-shrink:0;display:flex;gap:5px;align-items:center}
 
 /* ═══ COMPS / MEGA ═══ */
-#mg{display:none;flex:1;overflow:hidden;flex-direction:column;background:#121212;color:#e8e8e8;
+#mg{display:none;flex:1;min-height:0;overflow:hidden;flex-direction:column;background:#121212;color:#e8e8e8;
   --mgr:#d9272e;--mg2:#1b1b1b;--mgl:#2c2c2c;--mgt2:#a8a8a8;--mgt3:#6f6f6f}
 #mg.on{display:flex;min-height:0}
 #mg-top{display:flex;align-items:center;gap:14px;padding:12px 20px;flex-shrink:0}
@@ -324,7 +324,7 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
 .mgv{width:32px;height:30px;border-radius:6px;border:none;background:transparent;color:var(--mgt3);
   cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
 .mgv:hover{background:#242424;color:var(--mgt2)}.mgv.on{color:#f2f2f2}
-#mg-body{flex:1;overflow-y:auto;padding:0 0 40px}
+#mg-body{flex:1;overflow-y:auto;min-height:0;padding:0 0 40px}
 #mg-body::-webkit-scrollbar{width:12px}
 #mg-body::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:6px;border:3px solid #121212;background-clip:padding-box}
 .mg-head{display:flex;align-items:center;gap:14px;padding:0 20px 8px;border-bottom:1px solid var(--mgl);
@@ -399,7 +399,7 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
 #mgi-x{background:none;border:none;color:var(--mgt3);cursor:pointer;font-size:20px;margin-left:auto;flex-shrink:0}
 #mgi-t{font-size:15px;font-weight:600;color:#fff;line-height:1.35;overflow-wrap:anywhere}
 #mgi-s{font-size:12px;color:var(--mgt3);margin-top:4px}
-#mgi-b{flex:1;overflow-y:auto;padding:16px 18px 24px}
+#mgi-b{flex:1;overflow-y:auto;min-height:0;padding:16px 18px 24px}
 #mgi-b::-webkit-scrollbar{width:8px}
 #mgi-b::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:4px}
 .mgi-l{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--mgt3);margin:16px 0 7px}
@@ -422,7 +422,7 @@ kbd{font-size:11px;font-weight:700;background:#232428;border-radius:3px;padding:
 .link-row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ═══ LEADERBOARD — FL STUDIO ═══ */
-#lb{display:none;overflow-y:auto;flex:1;background:#3a3a3a;
+#lb{display:none;overflow-y:auto;flex:1;min-height:0;background:#3a3a3a;
   background-image:linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px);background-size:100% 3px;
   --flo:#f6931e;--flo2:#ffb454;--flt:#dcdcdc;--flt2:#9c9c9c;--flt3:#6e6e6e}
 #lb.on{display:block}
